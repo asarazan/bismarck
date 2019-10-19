@@ -1,25 +1,25 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml:2:1-46
-INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml:2:1-46
-INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml:2:1-46
+ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:1-46
+INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:1-46
+INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:1-46
 	package
-		ADDED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml:2:11-43
-		INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml
-		INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml
+		ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:11-43
+		INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
+		INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
 	xmlns:android
-		ADDED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml:2:1-46
+		ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:1-46
 uses-sdk
-INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml
-INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml
-INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml
-INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml
+INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
+INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
+INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
+INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
 	android:targetSdkVersion
-		INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml
-		ADDED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml
-		INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml
+		INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
+		ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
+		INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml
-		ADDED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml
-		INJECTED from /Users/asarazan/stencil/kotlin-mpp-standard/library/android/src/main/AndroidManifest.xml
+		INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
+		ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
+		INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
