@@ -1,0 +1,2 @@
+include ':app', ':bismarck', ':bismarck-android'
+rootProject.name='bismarck-parent'
