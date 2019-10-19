@@ -1,1 +1,1 @@
-co.novemberfive.kotlin
+net.sarazan.bismarck.android

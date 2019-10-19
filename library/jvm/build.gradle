@@ -9,6 +9,9 @@ dependencies {
     expectedBy project(":library:$libraryModuleName-common")
 
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    api "io.reactivex:rxjava:1.3.8"
+    compileOnly 'com.squareup.wire:wire-runtime:3.0.1'
+    compileOnly 'com.google.code.gson:gson:2.8.6'
 
     testCompile "junit:junit:4.12"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit"

@@ -37,6 +37,7 @@ repositories {
 
 dependencies {
     expectedBy project(":library:$libraryModuleName-common")
+    api project(":library:$libraryModuleName-jvm")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 

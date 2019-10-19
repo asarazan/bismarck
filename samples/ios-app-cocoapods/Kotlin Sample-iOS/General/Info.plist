@@ -5,7 +5,7 @@
     <key>CFBundleExecutable</key>
     <string>MyLibrary</string>
     <key>CFBundleIdentifier</key>
-    <string>co.novemberfive.kotlin.sample.MyLibrary</string>
+    <string>net.sarazan.bismarck.sample.MyLibrary</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>

@@ -1,14 +1,20 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:1-46
-INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:1-46
-INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:1-46
+ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:1-9:12
+INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:1-9:12
+INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:1-9:12
 	package
-		ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:11-43
+		ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:11-49
 		INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
 		INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml
 	xmlns:android
-		ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:2:1-46
+		ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:3:5-63
+uses-permission#android.permission.GET_ACCOUNTS
+ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:5:5-7:38
+	android:maxSdkVersion
+		ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:7:9-35
+	android:name
+		ADDED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml:6:9-55
 uses-sdk
 INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/asarazan/stencil/bismarck/library/android/src/main/AndroidManifest.xml

@@ -57,6 +57,6 @@ allprojects {
     }
 
     if (project.path.startsWith(":library")) {
-        project.group = 'co.novemberfive.kotlin'
+        project.group = 'net.sarazan.bismarck'
     }
 }

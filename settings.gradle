@@ -7,4 +7,3 @@ platforms.each { platform ->
 }
 
 include ':samples:android-app'
-include ':samples:android-app-bintray'

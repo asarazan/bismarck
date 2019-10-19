@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<manifest package="co.novemberfive.kotlin" />
+<manifest package="net.sarazan.bismarck.android"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission
+        android:name="android.permission.GET_ACCOUNTS"
+        android:maxSdkVersion="22" />
+
+</manifest>
