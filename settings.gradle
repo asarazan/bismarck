@@ -1,2 +1,10 @@
-include ':app', ':bismarck', ':bismarck-android'
-rootProject.name='bismarck-parent'
+def platforms = ['android', 'ios', 'jvm', 'common']
+
+platforms.each { platform ->
+    include ":library:$platform"
+
+    project(":library:$platform").name = "$libraryModuleName-$platform"
+}
+
+include ':samples:android-app'
+include ':samples:android-app-bintray'
