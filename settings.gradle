@@ -1,2 +1,5 @@
-include ':app', ':bismarck', ':bismarck-android'
-rootProject.name='bismarck-parent'
+rootProject.name = "bismarck-parent"
+
+include ':app'
+include ':bismarck'
+include ':bismarck-android'
