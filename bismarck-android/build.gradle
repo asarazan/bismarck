@@ -29,7 +29,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    api "$group:bismarck-jvm:$version" // would really like to find a better way to handle this.
+    // api "$group:bismarck-jvm:$version" // would really like to find a better way to handle this.
+    api project(":bismarck")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
