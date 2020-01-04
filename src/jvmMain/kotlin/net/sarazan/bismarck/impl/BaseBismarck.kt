@@ -33,7 +33,7 @@ open class BaseBismarck<T : Any>() : Bismarck<T> {
 
     // Because the [synchronized] calls were breaking and I'm lazy
     private val listeners                   = CopyOnWriteArrayList<Listener<T>>()
-    private val transforms = CopyOnWriteArrayList<Transform<T>>()
+    private val transforms                  = CopyOnWriteArrayList<Transform<T>>()
     private val subscribers                 = CopyOnWriteArrayList<Subscriber<in T>>()
     private val stateSubscribers            = CopyOnWriteArrayList<Subscriber<in BismarckState>>()
     private val dependents                  = CopyOnWriteArrayList<Bismarck<*>>()
@@ -44,11 +44,9 @@ open class BaseBismarck<T : Any>() : Bismarck<T> {
 
     protected var fetcher: Fetcher<T>?      = null
         private set
-    protected var persister: Persister<T>?  =
-        CachingPersister()
+    protected var persister: Persister<T>?  = CachingPersister()
         private set
-    protected var rateLimiter: RateLimiter? =
-        SimpleRateLimiter(15 * 60 * 1000L)
+    protected var rateLimiter: RateLimiter? = SimpleRateLimiter(15 * 60 * 1000L)
         private set
     protected var executor: Executor        = Bismarck.DEFAULT_EXECUTOR
         private set
