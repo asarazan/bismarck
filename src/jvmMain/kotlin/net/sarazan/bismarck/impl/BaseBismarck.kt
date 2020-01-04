@@ -16,6 +16,8 @@
 
 package net.sarazan.bismarck.impl
 
+import net.sarazan.bismarck.Listener
+import net.sarazan.bismarck.Persister
 import net.sarazan.bismarck.*
 import net.sarazan.bismarck.persisters.CachingPersister
 import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
@@ -151,12 +153,12 @@ open class BaseBismarck<T : Any>() : Bismarck<T> {
         }
         persister?.put(transformedData)
         rateLimiter?.let { if (transformedData == null) it.reset() else it.update() }
-        listeners.forEachCompat {
+        listeners.forEach {
             it.onUpdate(transformedData)
         }
         notifyChanged()
         if (old != transformedData) {
-            dependents.forEachCompat { it.invalidate() }
+            dependents.forEach { it.invalidate() }
         }
     }
 
@@ -166,12 +168,12 @@ open class BaseBismarck<T : Any>() : Bismarck<T> {
 
     override fun invalidate() {
         rateLimiter?.reset()
-        dependents.forEachCompat { it.invalidate() }
+        dependents.forEach { it.invalidate() }
     }
 
     override fun refresh() {
         if (!isFresh()) { asyncFetch() }
-        dependents.forEachCompat { it.refresh() }
+        dependents.forEach { it.refresh() }
     }
 
     override fun listen(listener: Listener<T>) = apply {
@@ -198,7 +200,7 @@ open class BaseBismarck<T : Any>() : Bismarck<T> {
         val state = peekState()
         if (state == lastState) return
         lastState = state
-        stateSubscribers.forEachCompat {
+        stateSubscribers.forEach {
             it.onNext(state)
         }
     }
@@ -218,7 +220,7 @@ open class BaseBismarck<T : Any>() : Bismarck<T> {
 
     override fun notifyChanged() {
         val data = peek()
-        subscribers.forEachCompat {
+        subscribers.forEach {
             it.onNext(data)
         }
     }

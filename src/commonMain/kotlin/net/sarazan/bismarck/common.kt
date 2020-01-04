@@ -1,4 +1,4 @@
-package com.jetbrains.handson.mpp.mobile
+package net.sarazan.bismarck
 
 import kotlin.reflect.KClass
 

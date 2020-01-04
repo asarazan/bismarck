@@ -16,8 +16,6 @@
 
 package net.sarazan.bismarck
 
-import com.jetbrains.handson.mpp.mobile.Throws
-
 
 interface Fetcher<T: Any> {
 

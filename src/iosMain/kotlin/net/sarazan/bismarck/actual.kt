@@ -1,4 +1,4 @@
-package com.jetbrains.handson.mpp.mobile
+package net.sarazan.bismarck
 
 import platform.UIKit.UIDevice
 import kotlin.native.Throws
