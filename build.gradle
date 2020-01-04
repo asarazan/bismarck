@@ -1,28 +1,70 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform' version '1.3.61'
+}
+repositories {
+    mavenCentral()
+}
+group 'com.example'
+version '0.0.1'
 
-buildscript {
-    ext.kotlin_version = '1.3.50'
-    repositories {
-        google()
-        jcenter()
+apply plugin: 'maven-publish'
+
+kotlin {
+    jvm()
+    // This is for iPhone emulator
+    // Switch here to iosArm64 (or iosArm32) to build library for iPhone device
+    iosX64("ios") {
+        binaries {
+            framework()
+        }
     }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'digital.wup:android-maven-publish:3.6.2'
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation kotlin('stdlib-common')
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation kotlin('test-common')
+                implementation kotlin('test-annotations-common')
+            }
+        }
+        jvmMain {
+            dependencies {
+                implementation kotlin('stdlib')
+                api "io.reactivex:rxjava:1.3.8"
+                compileOnly "com.squareup.wire:wire-runtime:3.0.1"
+                compileOnly "com.google.code.gson:gson:2.8.6"
+            }
+        }
+        jvmTest {
+            dependencies {
+                implementation kotlin('test')
+                implementation kotlin('test-junit')
+            }
+        }
+        iosMain {
+        }
+        iosTest {
+        }
     }
 }
 
-allprojects {
-    repositories {
-        google()
-        jcenter()
-        mavenLocal()
+task iosTest {
+    def device = project.findProperty("iosDevice")?.toString() ?: "iPhone 8"
+    dependsOn kotlin.targets.ios.binaries.getTest('DEBUG').linkTaskName
+    group = JavaBasePlugin.VERIFICATION_GROUP
+    description = "Runs tests for target 'ios' on an iOS simulator"
+
+    doLast {
+        def binary = kotlin.targets.ios.binaries.getTest('DEBUG').outputFile
+        exec {
+            commandLine 'xcrun', 'simctl', 'spawn', device, binary.absolutePath
+        }
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+configurations {
+    compileClasspath
 }
