@@ -31,7 +31,6 @@ import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
 @ExperimentalCoroutinesApi
 open class BaseBismarck<T : Any> : Bismarck<T> {
 
-    // Because the [synchronized] calls were breaking and I'm lazy
     private val listeners                   = frozenCopyOnWriteList<Listener<T>>()
     private val transforms                  = frozenCopyOnWriteList<Transform<T>>()
     private val dependents                  = frozenCopyOnWriteList<Bismarck<*>>()
