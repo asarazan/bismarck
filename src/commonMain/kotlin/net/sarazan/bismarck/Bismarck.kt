@@ -16,23 +16,13 @@
 
 package net.sarazan.bismarck
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import net.sarazan.bismarck.platform.Closeable
 
 interface Bismarck<T : Any> : Closeable {
 
-    /**
-     * TODO docs
-     */
-    @ExperimentalCoroutinesApi
-    val dataChannel: ConflatedBroadcastChannel<T?>
+    suspend fun consumeEachData(action: (T?) -> Unit)
 
-    /**
-     * TODO docs
-     */
-    @ExperimentalCoroutinesApi
-    val stateChannel: ConflatedBroadcastChannel<BismarckState>
+    suspend fun consumeEachState(action: (BismarckState?) -> Unit)
 
     /**
      * Manually set the data of the bismarck.
@@ -105,10 +95,4 @@ interface Bismarck<T : Any> : Closeable {
      * Sometimes you do bad things and the data gets changed without an [insert] call. Shame on you.
      */
     fun notifyChanged()
-
-    @ExperimentalCoroutinesApi
-    override fun close() {
-        dataChannel.close()
-        stateChannel.close()
-    }
 }

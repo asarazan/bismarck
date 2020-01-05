@@ -18,17 +18,14 @@ package net.sarazan.bismarck.impl
 
 import co.touchlab.stately.collections.frozenCopyOnWriteList
 import co.touchlab.stately.concurrency.AtomicInt
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.consumeEach
 import net.sarazan.bismarck.*
 import net.sarazan.bismarck.persisters.MemoryPersister
 import net.sarazan.bismarck.platform.currentTimeMillis
 import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
 
-@ExperimentalCoroutinesApi
 open class BaseBismarck<T : Any> : Bismarck<T> {
 
     private val listeners                   = frozenCopyOnWriteList<Listener<T>>()
@@ -49,10 +46,22 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
         private set
 
     @ExperimentalCoroutinesApi
-    override val dataChannel = ConflatedBroadcastChannel<T?>()
+    private val dataChannel = ConflatedBroadcastChannel<T?>()
 
     @ExperimentalCoroutinesApi
-    override val stateChannel = ConflatedBroadcastChannel<BismarckState>()
+    private val stateChannel = ConflatedBroadcastChannel<BismarckState>()
+
+    @ObsoleteCoroutinesApi
+    @ExperimentalCoroutinesApi
+    override suspend fun consumeEachData(action: (T?) -> Unit) {
+        dataChannel.consumeEach(action)
+    }
+
+    @ObsoleteCoroutinesApi
+    @ExperimentalCoroutinesApi
+    override suspend fun consumeEachState(action: (BismarckState?) -> Unit) {
+        stateChannel.consumeEach(action)
+    }
 
     /**
      * Synchronous fetch logic that will be called to fetch/populate our data.
@@ -82,11 +91,13 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
      */
     fun coroutineScope(coroutineScope: CoroutineScope) = apply { this.coroutineScope = coroutineScope }
 
+    @ExperimentalCoroutinesApi
     protected fun requestFetch() {
         fetchCount.incrementAndGet()
         updateState()
     }
 
+    @ExperimentalCoroutinesApi
     protected fun releaseFetch() {
         fetchCount.decrementAndGet()
         updateState()
@@ -108,6 +119,7 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
      */
     protected open fun onFetchError(fetch: Fetch<T>) {}
 
+    @ExperimentalCoroutinesApi
     protected fun performFetch() {
         val fetch = Fetch<T>()
         onFetchBegin(fetch)
@@ -124,23 +136,26 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
         }
     }
 
+    @ExperimentalCoroutinesApi
     protected open suspend fun blockingFetch() {
         requestFetch()
         performFetch()
         releaseFetch()
     }
 
+    @ExperimentalCoroutinesApi
     fun asyncFetch() {
         coroutineScope.launch {
             blockingFetch()
         }
     }
 
+    @ExperimentalCoroutinesApi
     override fun insert(data: T?) {
         val old = peek()
         val transformedData = transforms.fold(data) {
-            data, transformer ->
-            transformer.transform(data)
+            it, transformer ->
+            transformer.transform(it)
         }
         persister?.put(transformedData)
         rateLimiter?.let { if (transformedData == null) it.reset() else it.update() }
@@ -191,6 +206,7 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
         dependents.remove(other)
     }
 
+    @ExperimentalCoroutinesApi
     private fun updateState() {
         val state = peekState()
         if (state == lastState) return
@@ -213,10 +229,17 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
         return persister?.get()
     }
 
+    @ExperimentalCoroutinesApi
     override fun notifyChanged() {
         val data = peek()
         coroutineScope.launch {
             dataChannel.send(data)
         }
+    }
+
+    @ExperimentalCoroutinesApi
+    override fun close() {
+        dataChannel.close()
+        stateChannel.close()
     }
 }

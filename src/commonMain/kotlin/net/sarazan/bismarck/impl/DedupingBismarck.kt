@@ -28,11 +28,11 @@ import net.sarazan.bismarck.platform.currentTimeNano
  * A fetch will be discarded iff [isFresh] returns true
  * and no [invalidate] occurred since the fetch was requested.
  */
-@ExperimentalCoroutinesApi
 open class DedupingBismarck<T : Any> : BaseBismarck<T>() {
 
     private val lock = Lock()
 
+    @ExperimentalCoroutinesApi
     override suspend fun blockingFetch() {
         val ts = currentTimeNano()
         requestFetch()
