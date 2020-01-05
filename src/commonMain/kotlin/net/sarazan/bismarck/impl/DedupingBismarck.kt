@@ -16,6 +16,10 @@
 
 package net.sarazan.bismarck.impl
 
+import co.touchlab.stately.concurrency.Lock
+import co.touchlab.stately.concurrency.withLock
+import net.sarazan.bismarck.platform.currentTimeNano
+
 
 /**
  * This dedupes fetches by forcing sequential execution and checking timestamps.
@@ -25,12 +29,12 @@ package net.sarazan.bismarck.impl
  */
 open class DedupingBismarck<T : Any> : BaseBismarck<T>() {
 
-    private val lock = Any()
+    private val lock = Lock()
 
     override fun blockingFetch() {
-        val ts = System.nanoTime()
+        val ts = currentTimeNano()
         requestFetch()
-        synchronized(lock) {
+        lock.withLock {
             val lastInvalidate = rateLimiter?.lastReset ?: 0L
             if (lastInvalidate > ts || !isFresh()) {
                 performFetch()
