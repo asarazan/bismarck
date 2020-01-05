@@ -2,12 +2,9 @@ package net.sarazan.bismarck.platform
 
 import kotlin.reflect.KClass
 
-expect class ObservableLike<T> {
-
-}
-
-expect class SubscriberLike<T> {
-    fun onNext(data: T?)
+expect interface Closeable {
+    @Throws(Exception::class)
+    fun close()
 }
 
 expect fun currentTimeMillis(): Long

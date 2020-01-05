@@ -18,6 +18,7 @@ package net.sarazan.bismarck.impl
 
 import co.touchlab.stately.concurrency.Lock
 import co.touchlab.stately.concurrency.withLock
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import net.sarazan.bismarck.platform.currentTimeNano
 
 
@@ -27,11 +28,12 @@ import net.sarazan.bismarck.platform.currentTimeNano
  * A fetch will be discarded iff [isFresh] returns true
  * and no [invalidate] occurred since the fetch was requested.
  */
+@ExperimentalCoroutinesApi
 open class DedupingBismarck<T : Any> : BaseBismarck<T>() {
 
     private val lock = Lock()
 
-    override fun blockingFetch() {
+    override suspend fun blockingFetch() {
         val ts = currentTimeNano()
         requestFetch()
         lock.withLock {

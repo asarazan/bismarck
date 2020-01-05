@@ -17,10 +17,7 @@ actual fun platformName(): String {
 actual fun currentTimeMillis(): Long = getTimeMillis()
 actual fun currentTimeNano(): Long = getTimeNanos()
 
-actual class ObservableLike<T>
-actual class SubscriberLike<T> {
-    actual fun onNext(data: T?) {
-        TODO()
-    }
-
+actual interface Closeable {
+    @Throws(Exception::class)
+    actual fun close()
 }

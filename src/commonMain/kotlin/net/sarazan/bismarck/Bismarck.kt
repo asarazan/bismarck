@@ -16,19 +16,22 @@
 
 package net.sarazan.bismarck
 
-import net.sarazan.bismarck.platform.ObservableLike
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import net.sarazan.bismarck.platform.Closeable
 
-interface Bismarck<T : Any> {
-
-    /**
-     * Acquire an rx [Observable] for this data stream.
-     */
-    fun observe(): ObservableLike<T?>
+@ExperimentalCoroutinesApi
+interface Bismarck<T : Any> : Closeable {
 
     /**
-     * Keep tabs on in-flight fetches.
+     * TODO docs
      */
-    fun observeState(): ObservableLike<BismarckState>
+    val dataChannel: ConflatedBroadcastChannel<T?>
+
+    /**
+     * TODO docs
+     */
+    val stateChannel: ConflatedBroadcastChannel<BismarckState>
 
     /**
      * Manually set the data of the bismarck.
@@ -36,18 +39,12 @@ interface Bismarck<T : Any> {
     fun insert(data: T?)
 
     /**
-     * Make a synchronous fetch call. Should not be done on main thread.
-     */
-    fun blockingFetch()
-
-    /**
      * Synchronously grab the latest cached version of the data.
-     * It's a bit of a smell if you have to use this. You should use [observe] instead.
      */
     fun peek(): T?
 
     /**
-     * Hopefully I can get rid of this eventually, too.
+     * Synchronously grab the latest version of the bismarck state.
      */
     fun peekState(): BismarckState
 
@@ -107,4 +104,10 @@ interface Bismarck<T : Any> {
      * Sometimes you do bad things and the data gets changed without an [insert] call. Shame on you.
      */
     fun notifyChanged()
+
+    @ExperimentalCoroutinesApi
+    override fun close() {
+        dataChannel.close()
+        stateChannel.close()
+    }
 }

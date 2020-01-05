@@ -18,20 +18,22 @@ package net.sarazan.bismarck.impl
 
 import co.touchlab.stately.collections.frozenCopyOnWriteList
 import co.touchlab.stately.concurrency.AtomicInt
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.launch
 import net.sarazan.bismarck.*
 import net.sarazan.bismarck.persisters.MemoryPersister
-import net.sarazan.bismarck.platform.ObservableLike
-import net.sarazan.bismarck.platform.SubscriberLike
 import net.sarazan.bismarck.platform.currentTimeMillis
 import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
 
+@ExperimentalCoroutinesApi
 open class BaseBismarck<T : Any> : Bismarck<T> {
 
     // Because the [synchronized] calls were breaking and I'm lazy
     private val listeners                   = frozenCopyOnWriteList<Listener<T>>()
     private val transforms                  = frozenCopyOnWriteList<Transform<T>>()
-    private val subscribers                 = frozenCopyOnWriteList<SubscriberLike<in T>>()
-    private val stateSubscribers            = frozenCopyOnWriteList<SubscriberLike<in BismarckState>>()
     private val dependents                  = frozenCopyOnWriteList<Bismarck<*>>()
 
     private var fetchCount                  = AtomicInt(0)
@@ -44,6 +46,14 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
         private set
     protected var rateLimiter: RateLimiter? = SimpleRateLimiter(15 * 60 * 1000L)
         private set
+    protected var coroutineScope: CoroutineScope = GlobalScope
+        private set
+
+    @ExperimentalCoroutinesApi
+    override val dataChannel = ConflatedBroadcastChannel<T?>()
+
+    @ExperimentalCoroutinesApi
+    override val stateChannel = ConflatedBroadcastChannel<BismarckState>()
 
     /**
      * Synchronous fetch logic that will be called to fetch/populate our data.
@@ -67,6 +77,11 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
      * @default: [SimpleRateLimiter] data is fresh for 15 minutes or until manually invalidated.
      */
     fun rateLimiter(rateLimiter: RateLimiter?) = apply { this.rateLimiter = rateLimiter }
+
+    /**
+     * TODO docs
+     */
+    fun coroutineScope(coroutineScope: CoroutineScope) = apply { this.coroutineScope = coroutineScope }
 
     protected fun requestFetch() {
         fetchCount.incrementAndGet()
@@ -94,7 +109,7 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
      */
     protected open fun onFetchError(fetch: Fetch<T>) {}
 
-    protected fun performFetch() {
+    protected suspend fun performFetch() {
         val fetch = Fetch<T>()
         onFetchBegin(fetch)
         try {
@@ -110,27 +125,16 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
         }
     }
 
-    override fun blockingFetch() {
+    protected open suspend fun blockingFetch() {
         requestFetch()
         performFetch()
         releaseFetch()
     }
 
-    protected fun asyncFetch() {
-        // TODO
-//        executor.execute {
-//            blockingFetch()
-//        }
-    }
-
-    override fun observe(): ObservableLike<T?> {
-        TODO()
-//        return Observable.create(BismarckOnSubscribe())
-    }
-
-    override fun observeState(): ObservableLike<BismarckState> {
-        TODO()
-//        return Observable.create(StateOnSubscribe())
+    fun asyncFetch() {
+        coroutineScope.launch {
+            blockingFetch()
+        }
     }
 
     override fun insert(data: T?) {
@@ -188,12 +192,12 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
         dependents.remove(other)
     }
 
-    protected fun updateState() {
+    private fun updateState() {
         val state = peekState()
         if (state == lastState) return
         lastState = state
-        stateSubscribers.forEach {
-            it.onNext(state)
+        coroutineScope.launch {
+            stateChannel.send(state)
         }
     }
 
@@ -212,29 +216,8 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
 
     override fun notifyChanged() {
         val data = peek()
-        subscribers.forEach {
-            it.onNext(data)
+        coroutineScope.launch {
+            dataChannel.send(data)
         }
     }
-
-    // TODO
-//    private inner class StateOnSubscribe : Observable.OnSubscribe<BismarckState> {
-//        override fun call(sub: Subscriber<in BismarckState>) {
-//            if (sub.isUnsubscribed) return
-//            stateSubscribers.add(sub)
-//            sub.add(Subscriptions.create { stateSubscribers.remove(sub) })
-//            sub.onStart()
-//            sub.onNext(peekState())
-//        }
-//    }
-//
-//    private inner class BismarckOnSubscribe : Observable.OnSubscribe<T?> {
-//        override fun call(sub: Subscriber<in T?>) {
-//            if (sub.isUnsubscribed) return
-//            subscribers.add(sub)
-//            sub.add(Subscriptions.create { subscribers.remove(sub) })
-//            sub.onStart()
-//            peek().let { sub.onNext(it) }
-//        }
-//    }
 }
