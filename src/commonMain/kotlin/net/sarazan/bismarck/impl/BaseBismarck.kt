@@ -108,7 +108,7 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
      */
     protected open fun onFetchError(fetch: Fetch<T>) {}
 
-    protected suspend fun performFetch() {
+    protected fun performFetch() {
         val fetch = Fetch<T>()
         onFetchBegin(fetch)
         try {
