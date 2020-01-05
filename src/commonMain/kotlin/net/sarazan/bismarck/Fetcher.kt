@@ -22,7 +22,7 @@ import net.sarazan.bismarck.platform.Throws
 interface Fetcher<T: Any> {
 
     @Throws(BismarckFetchError::class)
-    fun onFetch(): T?
+    suspend fun fetch(): T?
 
     class BismarckFetchError(message: String, cause: Throwable? = null) : Exception(message, cause)
 }

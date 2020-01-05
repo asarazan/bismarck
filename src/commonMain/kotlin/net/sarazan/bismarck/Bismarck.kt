@@ -20,9 +20,9 @@ import net.sarazan.bismarck.platform.Closeable
 
 interface Bismarck<T : Any> : Closeable {
 
-    suspend fun consumeEachData(action: (T?) -> Unit)
+    fun consumeEachData(action: (T?) -> Unit)
 
-    suspend fun consumeEachState(action: (BismarckState?) -> Unit)
+    fun consumeEachState(action: (BismarckState?) -> Unit)
 
     /**
      * Manually set the data of the bismarck.

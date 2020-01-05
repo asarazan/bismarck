@@ -53,14 +53,18 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
 
     @ObsoleteCoroutinesApi
     @ExperimentalCoroutinesApi
-    override suspend fun consumeEachData(action: (T?) -> Unit) {
-        dataChannel.consumeEach(action)
+    override fun consumeEachData(action: (T?) -> Unit) {
+        coroutineScope.launch {
+            dataChannel.consumeEach(action)
+        }
     }
 
     @ObsoleteCoroutinesApi
     @ExperimentalCoroutinesApi
-    override suspend fun consumeEachState(action: (BismarckState?) -> Unit) {
-        stateChannel.consumeEach(action)
+    override fun consumeEachState(action: (BismarckState?) -> Unit) {
+        coroutineScope.launch {
+            stateChannel.consumeEach(action)
+        }
     }
 
     /**
@@ -120,11 +124,11 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
     protected open fun onFetchError(fetch: Fetch<T>) {}
 
     @ExperimentalCoroutinesApi
-    protected fun performFetch() {
+    protected suspend fun performFetch() {
         val fetch = Fetch<T>()
         onFetchBegin(fetch)
         try {
-            fetcher?.onFetch()?.apply {
+            fetcher?.fetch()?.apply {
                 lastError = null
                 if (onFetchEnd(fetch.copy(finished = currentTimeMillis(), data = this))) {
                     insert(this)
