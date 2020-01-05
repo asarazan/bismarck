@@ -164,15 +164,15 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
         dependents.forEach { it.refresh() }
     }
 
-    override fun listen(listener: Listener<T>) = apply {
+    override fun addListener(listener: Listener<T>) = apply {
         listeners.add(listener)
     }
 
-    override fun unlisten(listener: Listener<T>) = apply {
+    override fun removeListener(listener: Listener<T>) = apply {
         listeners.remove(listener)
     }
 
-    override fun transform(transform: Transform<T>) = apply {
+    override fun addTransform(transform: Transform<T>) = apply {
         transforms.add(transform)
     }
 
@@ -182,6 +182,10 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
 
     override fun addDependent(other: Bismarck<*>) = apply {
         dependents.add(other)
+    }
+
+    override fun removeDependent(other: Bismarck<*>) = apply {
+        dependents.remove(other)
     }
 
     protected fun updateState() {

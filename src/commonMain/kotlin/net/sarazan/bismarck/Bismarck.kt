@@ -70,17 +70,17 @@ interface Bismarck<T : Any> {
     /**
      * FIFO executed just after data insertion and before dependent invalidation
      */
-    fun listen(listener: Listener<T>): Bismarck<T>
+    fun addListener(listener: Listener<T>): Bismarck<T>
 
     /**
      * Remove a previously added listener
      */
-    fun unlisten(listener: Listener<T>): Bismarck<T>
+    fun removeListener(listener: Listener<T>): Bismarck<T>
 
     /**
      * FIFO executed just after data insertion and before dependent invalidation
      */
-    fun transform(transform: Transform<T>): Bismarck<T>
+    fun addTransform(transform: Transform<T>): Bismarck<T>
 
     /**
      * Remove a previously added listener
@@ -91,6 +91,11 @@ interface Bismarck<T : Any> {
      * Dependency chaining. Does not detect circular references, so be careful.
      */
     fun addDependent(other: Bismarck<*>): Bismarck<T>
+
+    /**
+     * Dependency chaining. Does not detect circular references, so be careful.
+     */
+    fun removeDependent(other: Bismarck<*>): Bismarck<T>
 
     /**
      * Type-agnostic method for clearing data,

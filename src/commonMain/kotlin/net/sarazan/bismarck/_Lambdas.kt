@@ -29,8 +29,8 @@ fun <T : Any, B : BaseBismarck<T>> B.fetcher(fn: () -> T?): B {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T : Any, B : Bismarck<T>> B.listen(fn: (T?) -> Unit): B {
-    return listen(object : Listener<T> {
+fun <T : Any, B : Bismarck<T>> B.addListener(fn: (T?) -> Unit): B {
+    return addListener(object : Listener<T> {
         override fun onUpdate(data: T?) {
             fn(data)
         }
@@ -38,8 +38,8 @@ fun <T : Any, B : Bismarck<T>> B.listen(fn: (T?) -> Unit): B {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T : Any, B : Bismarck<T>> B.transform(fn: (T?) -> T?): B {
-    return transform(object : Transform<T> {
+fun <T : Any, B : Bismarck<T>> B.addTransform(fn: (T?) -> T?): B {
+    return addTransform(object : Transform<T> {
         override fun transform(input: T?): T? {
             return fn(input)
         }
