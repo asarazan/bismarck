@@ -16,6 +16,8 @@
 
 package net.sarazan.bismarck
 
+import net.sarazan.bismarck.platform.Throws
+
 
 interface Fetcher<T: Any> {
 

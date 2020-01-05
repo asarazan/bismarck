@@ -1,6 +1,8 @@
-package net.sarazan.bismarck
+package net.sarazan.bismarck.platform
 
 import kotlin.reflect.KClass
+
+expect fun currentTimeMillis(): Long
 
 expect annotation class Throws(vararg val exceptionClasses: KClass<out Throwable>)
 

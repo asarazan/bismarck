@@ -16,8 +16,10 @@
 
 package net.sarazan.bismarck.impl
 
+import net.sarazan.bismarck.platform.currentTimeMillis
+
 data class Fetch<T : Any>(
-        val created: Long = System.currentTimeMillis(),
+        val created: Long = currentTimeMillis(),
         val userData: MutableMap<String, String> = hashMapOf(),
         val finished: Long? = null,
         val data: T? = null,
