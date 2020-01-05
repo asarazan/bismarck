@@ -18,8 +18,6 @@ package net.sarazan.bismarck.persisters
 
 import net.sarazan.bismarck.Serializer
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 
 
 abstract class JavaFilePersister<T: Any>(val root: String, val serializer: Serializer<T>) : MemoryPersister<T>() {
@@ -36,7 +34,7 @@ abstract class JavaFilePersister<T: Any>(val root: String, val serializer: Seria
         if (cached != null) return cached
         val file = File(root, "/$path")
         if (!file.exists()) return null
-        val loaded = FileInputStream(file).use { serializer.readObject(it) }
+        val loaded = serializer.deserialize(file.readBytes())
         super.put(loaded)
         return loaded
     }
@@ -55,7 +53,7 @@ abstract class JavaFilePersister<T: Any>(val root: String, val serializer: Seria
             if (!file.exists()) {
                 file.createNewFile()
             }
-            FileOutputStream(file).use { serializer.writeObject(it, data) }
+            file.writeBytes(serializer.serialize(data))
         }
     }
 }

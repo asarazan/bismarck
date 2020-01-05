@@ -34,20 +34,15 @@ package net.sarazan.bismarck.serializers
 
 import com.google.gson.Gson
 import net.sarazan.bismarck.Serializer
-import java.io.*
 
-
-class GsonSerializer<T: Any>(val cls: Class<T>, val gson: Gson) :
+class GsonSerializer<T: Any>(private val cls: Class<T>, private val gson: Gson) :
     Serializer<T> {
 
-    override fun writeObject(stream: OutputStream, data: T): Boolean {
-        stream.write(gson.toJson(data).toByteArray())
-        return true
+    override fun serialize(data: T): ByteArray {
+        return gson.toJson(data).toByteArray()
     }
 
-    override fun readObject(stream: InputStream): T? {
-        val bytes = ByteArray(stream.available())
-        stream.read(bytes)
+    override fun deserialize(bytes: ByteArray): T? {
         return gson.fromJson(String(bytes), cls)
     }
 }

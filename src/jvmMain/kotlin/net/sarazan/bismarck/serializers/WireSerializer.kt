@@ -16,20 +16,17 @@
 
 package net.sarazan.bismarck.serializers
 
-import net.sarazan.bismarck.Serializer
 import com.squareup.wire.Message
 import com.squareup.wire.ProtoAdapter
-import java.io.*
+import net.sarazan.bismarck.Serializer
 
 class WireSerializer<T : Message<T, *>>(val cls: Class<T>) : Serializer<T> {
 
-    override fun writeObject(stream: OutputStream, data: T): Boolean {
-        stream.write(data.encode())
-        return true
+    override fun deserialize(bytes: ByteArray): T? {
+        return ProtoAdapter.get(cls).decode(bytes)
     }
 
-    override fun readObject(stream: InputStream): T? {
-        return ProtoAdapter.get(cls).decode(stream)
+    override fun serialize(data: T): ByteArray {
+        return data.encode()
     }
-
 }

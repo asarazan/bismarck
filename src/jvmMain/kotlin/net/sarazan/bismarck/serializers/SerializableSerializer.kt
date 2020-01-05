@@ -19,25 +19,31 @@ package net.sarazan.bismarck.serializers
 import net.sarazan.bismarck.Serializer
 import java.io.*
 
-
 class SerializableSerializer<T : Serializable> : Serializer<T> {
 
-    override fun writeObject(stream: OutputStream, data: T): Boolean {
+    override fun serialize(data: T): ByteArray {
+        val stream = ByteArrayOutputStream()
         val oos = ObjectOutputStream(stream)
-        oos.writeObject(data)
-        oos.close()
-        return true
+        try {
+            oos.writeObject(data)
+            return stream.toByteArray()
+        } finally {
+            oos.close()
+            stream.close()
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun readObject(stream: InputStream): T? {
-        val ois = ObjectInputStream(stream)
+    override fun deserialize(bytes: ByteArray): T? {
+        val bis = ByteArrayInputStream(bytes)
+        val ois = ObjectInputStream(bis)
         try {
             return ois.readObject() as T
         } catch (e: ClassNotFoundException) {
             throw IOException(e)
         } finally {
             ois.close()
+            bis.close()
         }
     }
 }

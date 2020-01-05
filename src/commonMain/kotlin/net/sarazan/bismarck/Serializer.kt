@@ -16,11 +16,8 @@
 
 package net.sarazan.bismarck
 
-import java.io.InputStream
-import java.io.OutputStream
-
 
 interface Serializer<T: Any> {
-    fun readObject(stream: InputStream): T?
-    fun writeObject(stream: OutputStream, data: T): Boolean
+    fun deserialize(bytes: ByteArray): T?
+    fun serialize(data: T): ByteArray
 }

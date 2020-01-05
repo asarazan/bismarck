@@ -181,6 +181,7 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
         dependents.forEach { it.invalidate() }
     }
 
+    @ExperimentalCoroutinesApi
     override fun refresh() {
         if (!isFresh()) { asyncFetch() }
         dependents.forEach { it.refresh() }
