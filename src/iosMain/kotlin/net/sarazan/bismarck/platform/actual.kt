@@ -13,7 +13,11 @@ actual fun platformName(): String {
 }
 
 actual fun currentTimeMillis(): Long {
-    return (CFAbsoluteTimeGetCurrent() * 1000.0).toLong()
+    return (CFAbsoluteTimeGetCurrent() * 1_000.0).toLong()
+}
+
+actual fun currentTimeNano(): Long {
+    return (CFAbsoluteTimeGetCurrent() * 1_000_000_000.0).toLong()
 }
 
 actual class ObservableLike<T>
@@ -21,4 +25,5 @@ actual class SubscriberLike<T> {
     actual fun onNext(data: T?) {
         TODO()
     }
+
 }

@@ -22,6 +22,7 @@ import net.sarazan.bismarck.*
 import net.sarazan.bismarck.persisters.CachingPersister
 import net.sarazan.bismarck.platform.ObservableLike
 import net.sarazan.bismarck.platform.SubscriberLike
+import net.sarazan.bismarck.platform.currentTimeMillis
 import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
 
 open class BaseBismarck<T : Any> : Bismarck<T> {
@@ -99,12 +100,12 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
         try {
             fetcher?.onFetch()?.apply {
                 lastError = null
-                if (onFetchEnd(fetch.copy(finished = System.currentTimeMillis(), data = this))) {
+                if (onFetchEnd(fetch.copy(finished = currentTimeMillis(), data = this))) {
                     insert(this)
                 }
             }
         } catch (e: Fetcher.BismarckFetchError) {
-            onFetchError(fetch.copy(finished = System.currentTimeMillis(), error = e))
+            onFetchError(fetch.copy(finished = currentTimeMillis(), error = e))
             lastError = e
         }
     }

@@ -17,8 +17,7 @@
 package net.sarazan.bismarck.ratelimit
 
 import net.sarazan.bismarck.RateLimiter
-import java.util.concurrent.TimeUnit
-
+import net.sarazan.bismarck.platform.currentTimeNano
 
 class SimpleRateLimiter(val ms: Long) : RateLimiter {
 
@@ -48,12 +47,12 @@ class SimpleRateLimiter(val ms: Long) : RateLimiter {
     }
 
     private fun getCurrent(): Long {
-        return System.nanoTime()
+        return currentTimeNano()
     }
 
     private fun pass(current: Long): Boolean {
         val last = lastRun
-        val ns = TimeUnit.MILLISECONDS.toNanos(ms)
+        val ns = ms * 1_000_000
         return last == 0L || current - last >= ns
     }
 }

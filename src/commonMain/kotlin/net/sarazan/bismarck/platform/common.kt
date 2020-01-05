@@ -11,6 +11,7 @@ expect class SubscriberLike<T> {
 }
 
 expect fun currentTimeMillis(): Long
+expect fun currentTimeNano(): Long
 
 expect annotation class Throws(vararg val exceptionClasses: KClass<out Throwable>)
 

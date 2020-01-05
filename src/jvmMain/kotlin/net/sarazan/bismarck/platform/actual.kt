@@ -19,3 +19,7 @@ actual class SubscriberLike<T> {
         TODO()
     }
 }
+
+actual fun currentTimeNano(): Long {
+    return System.nanoTime()
+}
