@@ -18,8 +18,7 @@ package net.sarazan.bismarck
 
 import net.sarazan.bismarck.impl.BaseBismarck
 import net.sarazan.bismarck.impl.DedupingBismarck
-
-
+import kotlin.jvm.JvmStatic
 
 object Bismarcks {
 
