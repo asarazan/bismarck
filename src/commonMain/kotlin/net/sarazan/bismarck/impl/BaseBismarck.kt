@@ -19,7 +19,7 @@ package net.sarazan.bismarck.impl
 import co.touchlab.stately.collections.frozenCopyOnWriteList
 import co.touchlab.stately.concurrency.AtomicInt
 import net.sarazan.bismarck.*
-import net.sarazan.bismarck.persisters.CachingPersister
+import net.sarazan.bismarck.persisters.MemoryPersister
 import net.sarazan.bismarck.platform.ObservableLike
 import net.sarazan.bismarck.platform.SubscriberLike
 import net.sarazan.bismarck.platform.currentTimeMillis
@@ -40,7 +40,7 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
 
     protected var fetcher: Fetcher<T>?      = null
         private set
-    protected var persister: Persister<T>?  = CachingPersister()
+    protected var persister: Persister<T>?  = MemoryPersister()
         private set
     protected var rateLimiter: RateLimiter? = SimpleRateLimiter(15 * 60 * 1000L)
         private set
@@ -56,7 +56,7 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
     /**
      * If you want data to actually, you know, persist; then this is your guy.
      *
-     * @default: [CachingPersister] a simple in-memory persister
+     * @default: [MemoryPersister] a simple in-memory persister
      */
     fun persister(persister: Persister<T>?) = apply { this.persister = persister }
 

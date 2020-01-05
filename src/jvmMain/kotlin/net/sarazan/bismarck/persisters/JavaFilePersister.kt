@@ -22,7 +22,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 
 
-abstract class JavaFilePersister<T: Any>(val root: String, val serializer: Serializer<T>) : CachingPersister<T>() {
+abstract class JavaFilePersister<T: Any>(val root: String, val serializer: Serializer<T>) : MemoryPersister<T>() {
 
     /**
      * We require this to be dynamically computed because the path is often dependent on userid,
