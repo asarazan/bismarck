@@ -2,6 +2,14 @@ package net.sarazan.bismarck.platform
 
 import kotlin.reflect.KClass
 
+expect class ObservableLike<T> {
+
+}
+
+expect class SubscriberLike<T> {
+    fun onNext(data: T?)
+}
+
 expect fun currentTimeMillis(): Long
 
 expect annotation class Throws(vararg val exceptionClasses: KClass<out Throwable>)

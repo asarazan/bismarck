@@ -22,6 +22,8 @@ kotlin {
         commonMain {
             dependencies {
                 implementation kotlin('stdlib-common')
+                implementation "co.touchlab:stately:0.9.4"
+                implementation "co.touchlab:stately-collections:0.9.4"
             }
         }
         commonTest {

@@ -16,29 +16,24 @@
 
 package net.sarazan.bismarck.impl
 
-import net.sarazan.bismarck.Listener
-import net.sarazan.bismarck.Persister
+import co.touchlab.stately.collections.frozenCopyOnWriteList
+import co.touchlab.stately.concurrency.AtomicInt
 import net.sarazan.bismarck.*
 import net.sarazan.bismarck.persisters.CachingPersister
+import net.sarazan.bismarck.platform.ObservableLike
+import net.sarazan.bismarck.platform.SubscriberLike
 import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
-import rx.Observable
-import rx.Subscriber
-import rx.subscriptions.Subscriptions
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.Executor
-import java.util.concurrent.atomic.AtomicInteger
 
-
-open class BaseBismarck<T : Any>() : Bismarck<T> {
+open class BaseBismarck<T : Any> : Bismarck<T> {
 
     // Because the [synchronized] calls were breaking and I'm lazy
-    private val listeners                   = CopyOnWriteArrayList<Listener<T>>()
-    private val transforms                  = CopyOnWriteArrayList<Transform<T>>()
-    private val subscribers                 = CopyOnWriteArrayList<Subscriber<in T>>()
-    private val stateSubscribers            = CopyOnWriteArrayList<Subscriber<in BismarckState>>()
-    private val dependents                  = CopyOnWriteArrayList<Bismarck<*>>()
+    private val listeners                   = frozenCopyOnWriteList<Listener<T>>()
+    private val transforms                  = frozenCopyOnWriteList<Transform<T>>()
+    private val subscribers                 = frozenCopyOnWriteList<SubscriberLike<in T>>()
+    private val stateSubscribers            = frozenCopyOnWriteList<SubscriberLike<in BismarckState>>()
+    private val dependents                  = frozenCopyOnWriteList<Bismarck<*>>()
 
-    private var fetchCount                  = AtomicInteger(0)
+    private var fetchCount                  = AtomicInt(0)
     private var lastState: BismarckState?   = null
     private var lastError: Throwable?       = null
 
@@ -47,8 +42,6 @@ open class BaseBismarck<T : Any>() : Bismarck<T> {
     protected var persister: Persister<T>?  = CachingPersister()
         private set
     protected var rateLimiter: RateLimiter? = SimpleRateLimiter(15 * 60 * 1000L)
-        private set
-    protected var executor: Executor        = Bismarck.DEFAULT_EXECUTOR
         private set
 
     /**
@@ -73,13 +66,6 @@ open class BaseBismarck<T : Any>() : Bismarck<T> {
      * @default: [SimpleRateLimiter] data is fresh for 15 minutes or until manually invalidated.
      */
     fun rateLimiter(rateLimiter: RateLimiter?) = apply { this.rateLimiter = rateLimiter }
-
-    /**
-     * You should probably leave this alone-- but if you want to hand-tune thread allocations, knock yourself out.
-     *
-     * @default: shared instance of [Executors.newCachedThreadPool]
-     */
-    fun executor(executor: Executor) = apply { this.executor = executor }
 
     protected final fun requestFetch() {
         fetchCount.incrementAndGet()
@@ -130,17 +116,20 @@ open class BaseBismarck<T : Any>() : Bismarck<T> {
     }
 
     protected final fun asyncFetch() {
-        executor.execute {
-            blockingFetch()
-        }
+        // TODO
+//        executor.execute {
+//            blockingFetch()
+//        }
     }
 
-    override fun observe(): Observable<T?> {
-        return Observable.create(BismarckOnSubscribe())
+    override fun observe(): ObservableLike<T?> {
+        TODO()
+//        return Observable.create(BismarckOnSubscribe())
     }
 
-    override fun observeState(): Observable<BismarckState> {
-        return Observable.create(StateOnSubscribe())
+    override fun observeState(): ObservableLike<BismarckState> {
+        TODO()
+//        return Observable.create(StateOnSubscribe())
     }
 
     override fun insert(data: T?) {
@@ -223,23 +212,24 @@ open class BaseBismarck<T : Any>() : Bismarck<T> {
         }
     }
 
-    private inner class StateOnSubscribe : Observable.OnSubscribe<BismarckState> {
-        override fun call(sub: Subscriber<in BismarckState>) {
-            if (sub.isUnsubscribed) return
-            stateSubscribers.add(sub)
-            sub.add(Subscriptions.create { stateSubscribers.remove(sub) })
-            sub.onStart()
-            sub.onNext(peekState())
-        }
-    }
-
-    private inner class BismarckOnSubscribe : Observable.OnSubscribe<T?> {
-        override fun call(sub: Subscriber<in T?>) {
-            if (sub.isUnsubscribed) return
-            subscribers.add(sub)
-            sub.add(Subscriptions.create { subscribers.remove(sub) })
-            sub.onStart()
-            peek().let { sub.onNext(it) }
-        }
-    }
+    // TODO
+//    private inner class StateOnSubscribe : Observable.OnSubscribe<BismarckState> {
+//        override fun call(sub: Subscriber<in BismarckState>) {
+//            if (sub.isUnsubscribed) return
+//            stateSubscribers.add(sub)
+//            sub.add(Subscriptions.create { stateSubscribers.remove(sub) })
+//            sub.onStart()
+//            sub.onNext(peekState())
+//        }
+//    }
+//
+//    private inner class BismarckOnSubscribe : Observable.OnSubscribe<T?> {
+//        override fun call(sub: Subscriber<in T?>) {
+//            if (sub.isUnsubscribed) return
+//            subscribers.add(sub)
+//            sub.add(Subscriptions.create { subscribers.remove(sub) })
+//            sub.onStart()
+//            peek().let { sub.onNext(it) }
+//        }
+//    }
 }

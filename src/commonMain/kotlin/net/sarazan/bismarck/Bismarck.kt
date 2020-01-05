@@ -16,25 +16,19 @@
 
 package net.sarazan.bismarck
 
-import rx.Observable
-import java.util.concurrent.Executors
-
+import net.sarazan.bismarck.platform.ObservableLike
 
 interface Bismarck<T : Any> {
-
-    companion object {
-        val DEFAULT_EXECUTOR = Executors.newCachedThreadPool()
-    }
 
     /**
      * Acquire an rx [Observable] for this data stream.
      */
-    fun observe(): Observable<T?>
+    fun observe(): ObservableLike<T?>
 
     /**
      * Keep tabs on in-flight fetches.
      */
-    fun observeState(): Observable<BismarckState>
+    fun observeState(): ObservableLike<BismarckState>
 
     /**
      * Manually set the data of the bismarck.
