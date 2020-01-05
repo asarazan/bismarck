@@ -16,9 +16,11 @@
 
 package net.sarazan.bismarck
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import net.sarazan.bismarck.impl.BaseBismarck
 
 
+@ExperimentalCoroutinesApi
 @Suppress("UNCHECKED_CAST")
 fun <T : Any, B : BaseBismarck<T>> B.fetcher(fn: () -> T?): B {
     return fetcher(object: Fetcher<T> {

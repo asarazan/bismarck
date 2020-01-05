@@ -36,6 +36,7 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation kotlin('stdlib')
+                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3'
                 api "io.reactivex:rxjava:1.3.8"
                 compileOnly "com.squareup.wire:wire-runtime:3.0.1"
                 compileOnly "com.google.code.gson:gson:2.8.6"
@@ -48,6 +49,9 @@ kotlin {
             }
         }
         iosMain {
+            dependencies {
+                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-native:1.3.3'
+            }
         }
         iosTest {
         }

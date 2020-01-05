@@ -20,17 +20,18 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import net.sarazan.bismarck.platform.Closeable
 
-@ExperimentalCoroutinesApi
 interface Bismarck<T : Any> : Closeable {
 
     /**
      * TODO docs
      */
+    @ExperimentalCoroutinesApi
     val dataChannel: ConflatedBroadcastChannel<T?>
 
     /**
      * TODO docs
      */
+    @ExperimentalCoroutinesApi
     val stateChannel: ConflatedBroadcastChannel<BismarckState>
 
     /**
