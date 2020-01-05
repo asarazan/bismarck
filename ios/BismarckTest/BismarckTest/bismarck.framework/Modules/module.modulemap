@@ -1,0 +1,6 @@
+framework module bismarck {
+    umbrella header "bismarck.h"
+
+    export *
+    module * { export * }
+}
