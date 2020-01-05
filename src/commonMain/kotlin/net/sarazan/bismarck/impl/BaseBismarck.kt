@@ -68,12 +68,12 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
      */
     fun rateLimiter(rateLimiter: RateLimiter?) = apply { this.rateLimiter = rateLimiter }
 
-    protected final fun requestFetch() {
+    protected fun requestFetch() {
         fetchCount.incrementAndGet()
         updateState()
     }
 
-    protected final fun releaseFetch() {
+    protected fun releaseFetch() {
         fetchCount.decrementAndGet()
         updateState()
     }
@@ -94,7 +94,7 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
      */
     protected open fun onFetchError(fetch: Fetch<T>) {}
 
-    protected final fun performFetch() {
+    protected fun performFetch() {
         val fetch = Fetch<T>()
         onFetchBegin(fetch)
         try {
@@ -116,7 +116,7 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
         releaseFetch()
     }
 
-    protected final fun asyncFetch() {
+    protected fun asyncFetch() {
         // TODO
 //        executor.execute {
 //            blockingFetch()
