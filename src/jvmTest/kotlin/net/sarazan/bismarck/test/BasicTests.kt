@@ -29,7 +29,7 @@ class BasicTests {
 
         val bismarck: Bismarck<String> = BaseBismarck<String>().fetcher {
             delay(10)
-            "Bar".apply {
+            "Bar".also {
                 lock.unlock()
             }
         }
