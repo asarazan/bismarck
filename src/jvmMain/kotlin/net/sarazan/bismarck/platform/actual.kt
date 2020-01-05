@@ -1,25 +1,19 @@
 package net.sarazan.bismarck.platform
 
-import rx.Subscriber
 import kotlin.jvm.Throws
 
 actual typealias Throws = Throws
 
 actual fun platformName(): String {
-    return "Android"
+    return "JVM"
 }
 
-actual fun currentTimeMillis(): Long {
-    return System.currentTimeMillis()
-}
+actual fun currentTimeMillis(): Long = System.currentTimeMillis()
+actual fun currentTimeNano(): Long = System.nanoTime()
 
 actual class ObservableLike<T>
 actual class SubscriberLike<T> {
     actual fun onNext(data: T?) {
         TODO()
     }
-}
-
-actual fun currentTimeNano(): Long {
-    return System.nanoTime()
 }
