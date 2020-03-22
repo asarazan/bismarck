@@ -16,8 +16,12 @@
 
 package net.sarazan.bismarck
 
+import kotlin.js.JsName
 
+@JsName("Serializer")
 interface Serializer<T: Any> {
+    @JsName("deserialize")
     fun deserialize(bytes: ByteArray): T?
+    @JsName("serialize")
     fun serialize(data: T): ByteArray
 }

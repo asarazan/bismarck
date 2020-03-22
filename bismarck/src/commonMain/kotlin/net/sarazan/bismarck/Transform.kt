@@ -16,6 +16,10 @@
 
 package net.sarazan.bismarck
 
+import kotlin.js.JsName
+
+@JsName("Transform")
 interface Transform<T : Any> {
+    @JsName("transform")
     fun transform(input: T?): T?
 }

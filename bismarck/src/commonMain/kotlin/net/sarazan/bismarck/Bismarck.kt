@@ -17,82 +17,99 @@
 package net.sarazan.bismarck
 
 import net.sarazan.bismarck.platform.Closeable
+import kotlin.js.JsName
 
 interface Bismarck<T : Any> : Closeable {
 
+    @JsName("eachValue")
     fun consumeEachData(action: (T?) -> Unit)
 
+    @JsName("eachState")
     fun consumeEachState(action: (BismarckState?) -> Unit)
 
     /**
      * Manually set the data of the bismarck.
      */
+    @JsName("insert")
     fun insert(data: T?)
 
     /**
      * Synchronously grab the latest cached version of the data.
      */
+    @JsName("peek")
     fun peek(): T?
 
     /**
      * Synchronously grab the latest version of the bismarck state.
      */
+    @JsName("peekState")
     fun peekState(): BismarckState
 
     /**
      * The bismarck will usually employ some sort of timer or hash comparison to determine this.
      * Can also call [invalidate] to force this to false.
      */
+    @JsName("isFresh")
     fun isFresh(): Boolean
 
     /**
      * Should cause [isFresh] to return false.
      */
+    @JsName("invalidate")
     fun invalidate()
 
     /**
      * Trigger asyncFetch of this and all dependencies where [isFresh] is false.
      */
+    @JsName("refresh")
     fun refresh()
 
     /**
      * FIFO executed just after data insertion and before dependent invalidation
      */
+    @JsName("addListener")
     fun addListener(listener: Listener<T>): Bismarck<T>
 
     /**
      * Remove a previously added listener
      */
+    @JsName("removeListener")
     fun removeListener(listener: Listener<T>): Bismarck<T>
 
     /**
      * FIFO executed just after data insertion and before dependent invalidation
      */
+    @JsName("addTransform")
     fun addTransform(transform: Transform<T>): Bismarck<T>
 
     /**
      * Remove a previously added listener
      */
+    @JsName("removeTransform")
     fun removeTransform(transform: Transform<T>): Bismarck<T>
 
     /**
      * Dependency chaining. Does not detect circular references, so be careful.
      */
+    @JsName("addDependent")
     fun addDependent(other: Bismarck<*>): Bismarck<T>
 
     /**
      * Dependency chaining. Does not detect circular references, so be careful.
      */
+    @JsName("removeDependent")
     fun removeDependent(other: Bismarck<*>): Bismarck<T>
 
     /**
      * Type-agnostic method for clearing data,
      * since logouts will often cause this to happen in a foreach loop.
      */
+    @JsName("clear")
     fun clear() = insert(null)
 
     /**
      * Sometimes you do bad things and the data gets changed without an [insert] call. Shame on you.
      */
+    @JsName("notifyChanged")
     fun notifyChanged()
 }

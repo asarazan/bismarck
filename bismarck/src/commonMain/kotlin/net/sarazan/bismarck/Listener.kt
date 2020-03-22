@@ -16,7 +16,11 @@
 
 package net.sarazan.bismarck
 
+import kotlin.js.JsName
 
+@JsName("Listener")
 interface Listener<T : Any> {
+
+    @JsName("onUpdate")
     fun onUpdate(data: T?)
 }
