@@ -36,12 +36,9 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
     private var lastState: BismarckState?   = null
     private var lastError: Throwable?       = null
 
-    protected var fetcher: Fetcher<T>?      = null
-        private set
-    protected var persister: Persister<T>?  = MemoryPersister()
-        private set
-    protected var rateLimiter: RateLimiter? = SimpleRateLimiter(15 * 60 * 1000L)
-        private set
+    internal var fetcher: Fetcher<T>?      = null
+    internal var persister: Persister<T>?  = MemoryPersister()
+    internal var rateLimiter: RateLimiter? = null
     protected var coroutineScope: CoroutineScope = GlobalScope
         private set
 
