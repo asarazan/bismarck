@@ -1,0 +1,48 @@
+apply plugin: 'org.jetbrains.kotlin.multiplatform'
+
+kotlin {
+    js() {
+        nodejs {
+            runTask {
+                it.sourceMapStackTraces = false
+                it.compilation.packageJson {
+                    it.name = NPM_PACKAGE
+                    it.dependencies.remove("kotlin-source-map-loader")
+                }
+            }
+        }
+    }
+}
+
+println("Subproject: $name")
+
+task packageTypings {
+    doLast {
+        def file = new File("${rootProject.buildDir}/js/packages/${rootProject.name}-${project.name}/package.json")
+        def lines = file.readLines()
+                .collectMany {
+                    it.trim().startsWith("\"main\":")
+                            ? [it, "  \"types\": \"${project.name}.d.ts\","]
+                            : [it]
+                }
+        file.write(lines.join("\n"))
+    }
+}
+
+task copyTypings(type: Copy) {
+    dependsOn packageTypings
+    from "$projectDir/types/${project.name}.d.ts"
+    into "${rootProject.buildDir}/js/packages/${rootProject.name}-${project.name}"
+}
+
+task publishToNpm(type: Exec) {
+    group = "publishing"
+    dependsOn jsMainClasses
+    commandLine("yarn",
+            "publish",
+            "--cwd", "${rootProject.buildDir}/js/packages/${rootProject.name}-${project.name}",
+            "--new-version", version
+    )
+}
+
+jsMainClasses.dependsOn copyTypings

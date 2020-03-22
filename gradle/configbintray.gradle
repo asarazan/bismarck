@@ -1,0 +1,51 @@
+apply plugin: 'com.jfrog.bintray'
+
+def checkFileExists(String urlString)
+{
+    def url = new URL(urlString);
+    def connection = (HttpURLConnection)url.openConnection();
+    connection.setRequestMethod("GET");
+    connection.connect();
+    int code = connection.getResponseCode();
+    return code <= 299;
+}
+
+bintrayUpload.doFirst {
+    publications = []
+    def pubs = project.publishing.publications
+    for(pub in pubs)
+    {
+        String pubUrl = "https://dl.bintray.com/${POM_DEVELOPER_ORG}/${BINTRAY_REPO}/" +
+                pub.groupId.replace(".", "/") +"/"+ pub.artifactId +"/"+ pub.version +"/"+
+                pub.artifactId +"-"+ pub.version +".pom"
+        if(checkFileExists(pubUrl)) {
+            logger.warn("Publication exists "+ pubUrl)
+        } else {
+            logger.warn("Publication added "+ pubUrl)
+            publications += pub
+        }
+    }
+}
+
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_API_KEY")
+    publish = false
+    override = true
+    pkg {
+        repo = BINTRAY_REPO
+        name = POM_ARTIFACT_ID
+        userOrg = POM_DEVELOPER_ORG
+        licenses = ['Apache-2.0']
+        vcsUrl = POM_SCM_URL
+        websiteUrl = POM_URL
+        issueTrackerUrl = POM_SCM_ISSUES
+        version {
+            name = VERSION_NAME
+            vcsTag = VERSION_NAME
+            released = new Date()
+        }
+    }
+}
+
+bintrayUpload.dependsOn publishToMavenLocal
