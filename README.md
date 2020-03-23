@@ -1,4 +1,18 @@
-# bismarck
-New working group, package name, and artifacts COMING SOON!
+# Bismarck (it syncs)
+A new caching/syncing library for Kotlin Multiplatform
 
-Follow along at https://trello.com/b/EIpbTnML/bismarck
+Under heavy construction. Better examples and instructions coming soon.
+
+```kotlin
+val bismarck: Bismarck<String> = BaseBismarck<String>()
+  .persister(FilePersister("/saves", "123", JavaSerializer()))
+  .rateLimiter(SimpleRateLimiter(15 * 60 * 1000))
+  .fetcher { 
+      // do something expensive here
+      "https://www.google.com"
+  }   
+  
+  bismarck.eachValue { 
+      println("Received value $it")
+  }
+```
