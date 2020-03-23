@@ -17,7 +17,7 @@
 package net.sarazan.bismarck.persisters
 
 import net.sarazan.bismarck.Serializer
-import net.sarazan.bismarck.platform.FileLike
+import net.sarazan.bismarck.platform.files.FileLike
 import net.sarazan.bismarck.platform.JavaFile
 
 abstract class JavaFilePersister<T: Any>(

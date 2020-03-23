@@ -24,7 +24,7 @@ kotlin {
     js() {
         nodejs()
     }
-    ios() {
+    iosX64("ios") {
         binaries {
             framework {
                 freeCompilerArgs += "-Xobjc-generics"

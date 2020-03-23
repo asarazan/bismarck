@@ -1,7 +1,7 @@
-package net.sarazan.bismarck.platform
+package net.sarazan.bismarck.platform.files
 
 interface FileLike {
-    val parentFile: FileLike
+    val parentFile: FileLike?
     val exists: Boolean
 
     fun delete(): Boolean

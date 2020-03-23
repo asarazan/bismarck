@@ -1,5 +1,6 @@
 package net.sarazan.bismarck.platform
 
+import net.sarazan.bismarck.platform.files.FileLike
 import kotlin.js.Date
 import kotlin.reflect.KClass
 
@@ -13,4 +14,8 @@ actual annotation class Throws(
 actual interface Closeable {
     @Throws(Exception::class)
     actual fun close()
+}
+
+actual fun getFile(root: String, child: String?): FileLike {
+    TODO("Files are not yet implemented in JS")
 }
