@@ -5,7 +5,7 @@ Under heavy construction. Better examples and instructions coming soon.
 
 ```kotlin
 val bismarck = BaseBismarck<String>()
-  .persister(FilePersister("/saves", "123", JavaSerializer()))
+  .persister(FilePersister("/savefiles", "my_uid", JavaSerializer()))
   .rateLimiter(SimpleRateLimiter(15 * 60 * 1000))
   .fetcher { 
       // do something expensive here
