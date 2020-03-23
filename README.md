@@ -9,7 +9,7 @@ val bismarck = BaseBismarck<String>()
   .rateLimiter(SimpleRateLimiter(15 * 60 * 1000))
   .fetcher { 
       // do something expensive here
-      "https://www.google.com"
+      "Some hugely important derived value"
   }   
   
   bismarck.eachValue { 
