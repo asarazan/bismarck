@@ -3,16 +3,11 @@ package net.sarazan.bismarck.persisters
 import net.sarazan.bismarck.Serializer
 import net.sarazan.bismarck.platform.getFile
 
-abstract class FilePersister<T: Any>(
+class FilePersister<T: Any>(
     val root: String,
+    var path: String?,
     val serializer: Serializer<T>
 ) : MemoryPersister<T>() {
-    
-    /**
-     * We require this to be dynamically computed because the path is often dependent on userid,
-     * and we want to switch over automatically in case of an auth event.
-     */
-    abstract val path: String?
 
     override fun get(): T? {
         val path = path ?: return null

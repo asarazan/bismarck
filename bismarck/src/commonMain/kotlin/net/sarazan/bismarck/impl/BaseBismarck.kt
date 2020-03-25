@@ -50,7 +50,7 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
 
     @ObsoleteCoroutinesApi
     @ExperimentalCoroutinesApi
-    override fun consumeEachData(action: (T?) -> Unit) {
+    override fun eachValue(action: (T?) -> Unit) {
         coroutineScope.launch {
             dataChannel.consumeEach(action)
         }
@@ -58,7 +58,7 @@ open class BaseBismarck<T : Any> : Bismarck<T> {
 
     @ObsoleteCoroutinesApi
     @ExperimentalCoroutinesApi
-    override fun consumeEachState(action: (BismarckState?) -> Unit) {
+    override fun eachState(action: (BismarckState?) -> Unit) {
         coroutineScope.launch {
             stateChannel.consumeEach(action)
         }

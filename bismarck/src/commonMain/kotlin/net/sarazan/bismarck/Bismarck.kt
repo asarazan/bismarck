@@ -22,10 +22,10 @@ import kotlin.js.JsName
 interface Bismarck<T : Any> : Closeable {
 
     @JsName("eachValue")
-    fun consumeEachData(action: (T?) -> Unit)
+    fun eachValue(action: (T?) -> Unit)
 
     @JsName("eachState")
-    fun consumeEachState(action: (BismarckState?) -> Unit)
+    fun eachState(action: (BismarckState?) -> Unit)
 
     /**
      * Manually set the data of the bismarck.

@@ -19,7 +19,7 @@ package net.sarazan.bismarck.serializers
 import net.sarazan.bismarck.Serializer
 import java.io.*
 
-class SerializableSerializer<T : Serializable> : Serializer<T> {
+class JavaSerializer<T : Serializable> : Serializer<T> {
 
     override fun serialize(data: T): ByteArray {
         val stream = ByteArrayOutputStream()

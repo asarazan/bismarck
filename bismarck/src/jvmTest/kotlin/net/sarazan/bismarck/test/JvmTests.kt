@@ -7,6 +7,10 @@ import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.BismarckState
 import net.sarazan.bismarck.fetcher
 import net.sarazan.bismarck.impl.BaseBismarck
+import net.sarazan.bismarck.persisters.FilePersister
+import net.sarazan.bismarck.persisters.MemoryPersister
+import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
+import net.sarazan.bismarck.serializers.JavaSerializer
 import net.sarazan.bismarck.util.concurrency.SuspendLock
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,7 +20,16 @@ class JvmTests {
 
     @Test
     fun testInsert() {
-        val bismarck: Bismarck<String> = BaseBismarck()
+        val bismarck: Bismarck<String> = BaseBismarck<String>()
+            .persister(MemoryPersister)
+            .rateLimiter(SimpleRateLimiter(15 * 60 * 1000))
+            .fetcher {
+                // do something expensive here
+                "Some hugely important derived value"
+            }
+        bismarck.eachValue {
+            println("Received value $it")
+        }
 
         assertEquals(null, bismarck.peek())
         assertEquals(BismarckState.Stale, bismarck.peekState())
@@ -49,7 +62,7 @@ class JvmTests {
         val lock = SuspendLock(true)
         val bismarck: Bismarck<String> = BaseBismarck()
         var value: String? = null
-        bismarck.consumeEachData {
+        bismarck.eachValue {
             value = it
             lock.unlock()
         }
