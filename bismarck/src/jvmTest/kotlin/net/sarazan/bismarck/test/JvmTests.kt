@@ -31,6 +31,7 @@ class JvmTests {
         bismarck.insert("Foo")
         assertEquals(Fresh, bismarck.state)
         bismarck.invalidate()
+        delay(100) // TODO Remove this. It shouldn't be necessary but the test is flaky without it.
         assertEquals(Stale, bismarck.state)
         bismarck.insert("Foo")
         assertEquals(Fresh, bismarck.state)

@@ -11,17 +11,18 @@ import net.sarazan.bismarck.platform.Closeable
 data class NuBismarckConfig<T : Any>(
     var fetcher: Fetcher<T>? = null,
     var rateLimiter: RateLimiter? = null,
-    var persister: Persister<T>? = null,
-    var scope: CoroutineScope? = null
+    var persister: Persister<T> = MemoryPersister(),
+    var scope: CoroutineScope = GlobalScope
 )
 
 @ExperimentalCoroutinesApi
 class NuBismarck<T : Any>(config: NuBismarckConfig<T>.() -> Unit = {}) : Closeable {
 
-    val fetcher: Fetcher<T>?
-    val rateLimiter: RateLimiter?
-    val persister: Persister<T>
-    val scope: CoroutineScope
+    private val config = NuBismarckConfig<T>().apply(config)
+    val fetcher get() = this.config.fetcher
+    val rateLimiter get() = this.config.rateLimiter
+    val persister get() = this.config.persister
+    val scope get() = this.config.scope
 
     var value: T?
         get() = persister.get()
@@ -31,14 +32,12 @@ class NuBismarck<T : Any>(config: NuBismarckConfig<T>.() -> Unit = {}) : Closeab
                 valueChannel.send(value)
             }
         }
-    val valueChannel: ConflatedBroadcastChannel<T?>
 
     val state: BismarckState get() = when {
         fetcher != null && fetchCount.get() > 0 -> BismarckState.Fetching
         isFresh -> BismarckState.Fresh
         else -> Stale
     }
-    val stateChannel: ConflatedBroadcastChannel<BismarckState>
 
     val isFresh: Boolean get() {
         return rateLimiter?.isFresh() ?: false
@@ -46,15 +45,10 @@ class NuBismarck<T : Any>(config: NuBismarckConfig<T>.() -> Unit = {}) : Closeab
 
     private val fetchCount = AtomicInt(0)
 
+    val valueChannel by lazy { ConflatedBroadcastChannel(value) }
+    val stateChannel by lazy { ConflatedBroadcastChannel(state) }
+
     init {
-        NuBismarckConfig<T>().apply(config).let {
-            fetcher = it.fetcher
-            rateLimiter = it.rateLimiter
-            persister = it.persister ?: MemoryPersister()
-            scope = it.scope ?: GlobalScope
-        }
-        valueChannel = ConflatedBroadcastChannel(value)
-        stateChannel = ConflatedBroadcastChannel(state)
         scope.launch {
             valueChannel.send(value)
             stateChannel.send(state)
