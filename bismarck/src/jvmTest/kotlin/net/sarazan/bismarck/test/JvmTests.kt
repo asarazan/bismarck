@@ -2,7 +2,6 @@ package net.sarazan.bismarck.test
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.test.runBlockingTest
 import net.sarazan.bismarck.BismarckState
 import net.sarazan.bismarck.BismarckState.*
 import net.sarazan.bismarck.NuBismarck
@@ -16,7 +15,7 @@ import kotlin.test.assertEquals
 class JvmTests {
 
     @Test
-    fun testInsert() = runBlockingTest {
+    fun testInsert() = runBlocking {
         val bismarck = NuBismarck<String>()
         assertEquals(null, bismarck.value)
         bismarck.insert("Foo")
@@ -24,7 +23,7 @@ class JvmTests {
     }
 
     @Test
-    fun testFreshness() {
+    fun testFreshness() = runBlocking {
         val bismarck = NuBismarck<String> {
             rateLimiter = SimpleRateLimiter(100)
         }
@@ -35,14 +34,12 @@ class JvmTests {
         assertEquals(Stale, bismarck.state)
         bismarck.insert("Foo")
         assertEquals(Fresh, bismarck.state)
-        runBlocking {
-            delay(200)
-        }
+        delay(200)
         assertEquals(Stale, bismarck.state)
     }
 
     @Test
-    fun testFetch() {
+    fun testFetch() = runBlocking {
         val bismarck = NuBismarck<String> {
             rateLimiter = SimpleRateLimiter(100)
             fetcher = {
@@ -54,20 +51,16 @@ class JvmTests {
         bismarck.invalidate()
         assertEquals(Fetching, bismarck.state)
         assertEquals(null, bismarck.value)
-        runBlocking {
-            delay(50)
-        }
+        delay(50)
         assertEquals(Fetching, bismarck.state)
         assertEquals(null, bismarck.value)
-        runBlocking {
-            delay(100)
-        }
+        delay(100)
         assertEquals("Foo", bismarck.value)
         assertEquals(Fresh, bismarck.state)
     }
 
     @Test
-    fun testPersisterInit() {
+    fun testPersisterInit() = runBlocking {
         val persister = MemoryPersister<String>()
         var bismarck = NuBismarck<String> {
             this.persister = persister
@@ -80,7 +73,7 @@ class JvmTests {
     }
 
     @Test
-    fun testDataChannel() {
+    fun testDataChannel() = runBlocking {
         var received: String? = null
         val bismarck = NuBismarck<String>()
         GlobalScope.launch {
@@ -90,12 +83,12 @@ class JvmTests {
         }
         assertEquals(null, received)
         bismarck.insert("Foo")
-        runBlocking { delay(100) }
+        delay(100)
         assertEquals("Foo", received)
     }
 
     @Test
-    fun testStateChannel() {
+    fun testStateChannel() = runBlocking {
         var received: BismarckState? = null
         val bismarck = NuBismarck<String> {
             rateLimiter = SimpleRateLimiter(100)
@@ -110,12 +103,12 @@ class JvmTests {
             }
         }
         assertEquals(null, received)
-        runBlocking { delay(50) }
+        delay(50)
         assertEquals(Stale, received)
         bismarck.invalidate()
-        runBlocking { delay(50) }
+        delay(50)
         assertEquals(Fetching, received)
-        runBlocking { delay(100) }
+        delay(100)
         assertEquals(Fresh, received)
     }
 }

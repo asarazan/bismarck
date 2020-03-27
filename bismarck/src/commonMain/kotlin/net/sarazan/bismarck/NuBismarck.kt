@@ -3,28 +3,25 @@ package net.sarazan.bismarck
 import co.touchlab.stately.concurrency.AtomicInt
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import net.sarazan.bismarck.BismarckState.Stale
 import net.sarazan.bismarck.impl.Fetcher
 import net.sarazan.bismarck.persisters.MemoryPersister
 import net.sarazan.bismarck.platform.Closeable
 
-// TODO - expose publicly
-private val scope = GlobalScope
-
 data class NuBismarckConfig<T : Any>(
     var fetcher: Fetcher<T>? = null,
     var rateLimiter: RateLimiter? = null,
-    var persister: Persister<T>? = null
+    var persister: Persister<T>? = null,
+    var scope: CoroutineScope? = null
 )
 
 @ExperimentalCoroutinesApi
 class NuBismarck<T : Any>(config: NuBismarckConfig<T>.() -> Unit = {}) : Closeable {
 
-    var fetcher: Fetcher<T>? = null
-        private set
-    var rateLimiter: RateLimiter? = null
-        private set
-    var persister: Persister<T> = MemoryPersister()
-        private set
+    val fetcher: Fetcher<T>?
+    val rateLimiter: RateLimiter?
+    val persister: Persister<T>
+    val scope: CoroutineScope
 
     var value: T?
         get() = persister.get()
@@ -34,14 +31,14 @@ class NuBismarck<T : Any>(config: NuBismarckConfig<T>.() -> Unit = {}) : Closeab
                 valueChannel.send(value)
             }
         }
-    val valueChannel = ConflatedBroadcastChannel(value)
+    val valueChannel: ConflatedBroadcastChannel<T?>
 
-    val state: BismarckState? get() = when {
+    val state: BismarckState get() = when {
         fetcher != null && fetchCount.get() > 0 -> BismarckState.Fetching
         isFresh -> BismarckState.Fresh
-        else -> BismarckState.Stale
+        else -> Stale
     }
-    val stateChannel = ConflatedBroadcastChannel(state)
+    val stateChannel: ConflatedBroadcastChannel<BismarckState>
 
     val isFresh: Boolean get() {
         return rateLimiter?.isFresh() ?: false
@@ -53,8 +50,11 @@ class NuBismarck<T : Any>(config: NuBismarckConfig<T>.() -> Unit = {}) : Closeab
         NuBismarckConfig<T>().apply(config).let {
             fetcher = it.fetcher
             rateLimiter = it.rateLimiter
-            persister = it.persister ?: persister
+            persister = it.persister ?: MemoryPersister()
+            scope = it.scope ?: GlobalScope
         }
+        valueChannel = ConflatedBroadcastChannel(value)
+        stateChannel = ConflatedBroadcastChannel(state)
         scope.launch {
             valueChannel.send(value)
             stateChannel.send(state)
