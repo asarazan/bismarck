@@ -1,9 +1,9 @@
 package net.sarazan.bismarck.test
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.test.runBlockingTest
+import net.sarazan.bismarck.BismarckState
 import net.sarazan.bismarck.BismarckState.*
 import net.sarazan.bismarck.NuBismarck
 import net.sarazan.bismarck.persisters.MemoryPersister
@@ -11,6 +11,7 @@ import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 class JvmTests {
 
@@ -76,5 +77,45 @@ class JvmTests {
             this.persister = persister
         }
         assertEquals("Foo", bismarck.value)
+    }
+
+    @Test
+    fun testDataChannel() {
+        var received: String? = null
+        val bismarck = NuBismarck<String>()
+        GlobalScope.launch {
+            bismarck.valueChannel.consumeEach {
+                received = it
+            }
+        }
+        assertEquals(null, received)
+        bismarck.insert("Foo")
+        runBlocking { delay(100) }
+        assertEquals("Foo", received)
+    }
+
+    @Test
+    fun testStateChannel() {
+        var received: BismarckState? = null
+        val bismarck = NuBismarck<String> {
+            rateLimiter = SimpleRateLimiter(100)
+            fetcher = {
+                delay(100)
+                "Foo"
+            }
+        }
+        GlobalScope.launch {
+            bismarck.stateChannel.consumeEach {
+                received = it
+            }
+        }
+        assertEquals(null, received)
+        runBlocking { delay(50) }
+        assertEquals(Stale, received)
+        bismarck.invalidate()
+        runBlocking { delay(50) }
+        assertEquals(Fetching, received)
+        runBlocking { delay(100) }
+        assertEquals(Fresh, received)
     }
 }

@@ -26,12 +26,12 @@ class NuBismarck<T : Any>(config: NuBismarckConfig<T>.() -> Unit = {}) : Closeab
     var persister: Persister<T> = MemoryPersister()
         private set
 
-    var value: T? = null
+    var value: T?
         get() = persister.get()
         private set(value) {
             persister.put(value)
             scope.launch {
-                valueChannel.send(field)
+                valueChannel.send(value)
             }
         }
     val valueChannel = ConflatedBroadcastChannel(value)
