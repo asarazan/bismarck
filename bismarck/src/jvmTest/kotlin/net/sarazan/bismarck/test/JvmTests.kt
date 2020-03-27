@@ -2,16 +2,12 @@ package net.sarazan.bismarck.test
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
-import net.sarazan.bismarck.Bismarck
-import net.sarazan.bismarck.BismarckState
-import net.sarazan.bismarck.fetcher
-import net.sarazan.bismarck.impl.BaseBismarck
-import net.sarazan.bismarck.persisters.FilePersister
+import net.sarazan.bismarck.BismarckState.*
+import net.sarazan.bismarck.NuBismarck
 import net.sarazan.bismarck.persisters.MemoryPersister
 import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
-import net.sarazan.bismarck.serializers.JavaSerializer
-import net.sarazan.bismarck.util.concurrency.SuspendLock
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -19,57 +15,66 @@ import kotlin.test.assertEquals
 class JvmTests {
 
     @Test
-    fun testInsert() {
-        val bismarck: Bismarck<String> = BaseBismarck<String>()
-            .persister(MemoryPersister)
-            .rateLimiter(SimpleRateLimiter(15 * 60 * 1000))
-            .fetcher {
-                // do something expensive here
-                "Some hugely important derived value"
-            }
-        bismarck.eachValue {
-            println("Received value $it")
-        }
-
-        assertEquals(null, bismarck.peek())
-        assertEquals(BismarckState.Stale, bismarck.peekState())
+    fun testInsert() = runBlockingTest {
+        val bismarck = NuBismarck<String>()
+        assertEquals(null, bismarck.value)
         bismarck.insert("Foo")
-        assertEquals("Foo", bismarck.peek())
-        assertEquals(BismarckState.Fresh, bismarck.peekState())
+        assertEquals("Foo", bismarck.value)
     }
 
     @Test
-    fun testFetch() = runBlockingTest {
-        val lock = SuspendLock(true)
-
-        val bismarck: Bismarck<String> = BaseBismarck<String>().fetcher {
-            delay(10)
-            "Bar".also {
-                lock.unlock()
-            }
+    fun testFreshness() {
+        val bismarck = NuBismarck<String> {
+            rateLimiter = SimpleRateLimiter(100)
         }
-
-        bismarck.refresh()
-        lock.lock()
-        delay(1)
-
-        assertEquals("Bar", bismarck.peek())
-        assertEquals(BismarckState.Fresh, bismarck.peekState())
+        assertEquals(Stale, bismarck.state)
+        bismarck.insert("Foo")
+        assertEquals(Fresh, bismarck.state)
+        bismarck.invalidate()
+        assertEquals(Stale, bismarck.state)
+        bismarck.insert("Foo")
+        assertEquals(Fresh, bismarck.state)
+        runBlocking {
+            delay(200)
+        }
+        assertEquals(Stale, bismarck.state)
     }
 
     @Test
-    fun testConsume() = runBlockingTest {
-        val lock = SuspendLock(true)
-        val bismarck: Bismarck<String> = BaseBismarck()
-        var value: String? = null
-        bismarck.eachValue {
-            value = it
-            lock.unlock()
+    fun testFetch() {
+        val bismarck = NuBismarck<String> {
+            rateLimiter = SimpleRateLimiter(100)
+            fetcher = {
+                delay(100)
+                "Foo"
+            }
         }
-        bismarck.insert("Foo")
-        lock.lock()
-        delay(1)
-        assertEquals("Foo", value)
+        assertEquals(Stale, bismarck.state)
+        bismarck.invalidate()
+        assertEquals(Fetching, bismarck.state)
+        assertEquals(null, bismarck.value)
+        runBlocking {
+            delay(50)
+        }
+        assertEquals(Fetching, bismarck.state)
+        assertEquals(null, bismarck.value)
+        runBlocking {
+            delay(100)
+        }
+        assertEquals("Foo", bismarck.value)
+        assertEquals(Fresh, bismarck.state)
     }
 
+    @Test
+    fun testPersisterInit() {
+        val persister = MemoryPersister<String>()
+        var bismarck = NuBismarck<String> {
+            this.persister = persister
+        }
+        bismarck.insert("Foo")
+        bismarck = NuBismarck {
+            this.persister = persister
+        }
+        assertEquals("Foo", bismarck.value)
+    }
 }

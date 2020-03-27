@@ -20,6 +20,5 @@ package net.sarazan.bismarck
 enum class BismarckState {
     Fresh,
     Stale,
-    Fetching,
-    Error
+    Fetching
 }
