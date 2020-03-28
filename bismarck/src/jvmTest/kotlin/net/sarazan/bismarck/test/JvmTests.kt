@@ -16,7 +16,9 @@ class JvmTests {
 
     @Test
     fun testInsert() = runBlocking {
-        val bismarck = NuBismarck<String>()
+        val bismarck = NuBismarck<String> {
+            debug = true
+        }
         assertEquals(null, bismarck.value)
         bismarck.insert("Foo")
         assertEquals("Foo", bismarck.value)
@@ -25,13 +27,13 @@ class JvmTests {
     @Test
     fun testFreshness() = runBlocking {
         val bismarck = NuBismarck<String> {
+            debug = true
             rateLimiter = SimpleRateLimiter(100)
         }
         assertEquals(Stale, bismarck.state)
         bismarck.insert("Foo")
         assertEquals(Fresh, bismarck.state)
         bismarck.invalidate()
-        delay(100) // TODO Remove this. It shouldn't be necessary but the test is flaky without it.
         assertEquals(Stale, bismarck.state)
         bismarck.insert("Foo")
         assertEquals(Fresh, bismarck.state)
@@ -42,6 +44,7 @@ class JvmTests {
     @Test
     fun testFetch() = runBlocking {
         val bismarck = NuBismarck<String> {
+            debug = true
             rateLimiter = SimpleRateLimiter(100)
             fetcher = {
                 delay(100)
@@ -64,10 +67,12 @@ class JvmTests {
     fun testPersisterInit() = runBlocking {
         val persister = MemoryPersister<String>()
         var bismarck = NuBismarck<String> {
+            debug = true
             this.persister = persister
         }
         bismarck.insert("Foo")
         bismarck = NuBismarck {
+            debug = true
             this.persister = persister
         }
         assertEquals("Foo", bismarck.value)
@@ -76,7 +81,9 @@ class JvmTests {
     @Test
     fun testDataChannel() = runBlocking {
         var received: String? = null
-        val bismarck = NuBismarck<String>()
+        val bismarck = NuBismarck<String> {
+            debug = true
+        }
         GlobalScope.launch {
             bismarck.valueChannel.consumeEach {
                 received = it
@@ -92,6 +99,7 @@ class JvmTests {
     fun testStateChannel() = runBlocking {
         var received: BismarckState? = null
         val bismarck = NuBismarck<String> {
+            debug = true
             rateLimiter = SimpleRateLimiter(100)
             fetcher = {
                 delay(100)
