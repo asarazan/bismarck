@@ -16,7 +16,6 @@
 
 package net.sarazan.bismarck
 
-
 interface StateListener {
     fun onStateChanged(state: BismarckState)
 }

@@ -1,115 +1,145 @@
-/*
- * Copyright 2019 The Bismarck Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package net.sarazan.bismarck
 
+import co.touchlab.stately.concurrency.AtomicInt
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.launch
+import net.sarazan.bismarck.BismarckState.Stale
+import net.sarazan.bismarck.fetch.Fetch
+import net.sarazan.bismarck.fetch.Fetcher
+import net.sarazan.bismarck.persisters.MemoryPersister
 import net.sarazan.bismarck.platform.Closeable
-import kotlin.js.JsName
 
-interface Bismarck<T : Any> : Closeable {
+data class BismarckConfig<T : Any>(
+    var fetch: Fetch<T>? = null,
+    var rateLimiter: RateLimiter? = null,
+    var persister: Persister<T> = MemoryPersister(),
+    var dedupe: Boolean = true,
+    var scope: CoroutineScope = GlobalScope,
+    var debug: Boolean = false
+)
 
-    @JsName("eachValue")
-    fun eachValue(action: (T?) -> Unit)
+@ExperimentalCoroutinesApi
+class Bismarck<T : Any>(private val config: BismarckConfig<T>) : Closeable {
+    constructor(config: BismarckConfig<T>.() -> Unit = {}) : this(BismarckConfig<T>().apply(config))
 
-    @JsName("eachState")
-    fun eachState(action: (BismarckState?) -> Unit)
+    val rateLimiter get() = this.config.rateLimiter
+    val persister get() = this.config.persister
+    val scope get() = this.config.scope
+    val fetcher = Fetcher.get(this.config.fetch, rateLimiter, this.config.dedupe)
 
-    /**
-     * Manually set the data of the bismarck.
-     */
-    @JsName("insert")
-    fun insert(data: T?)
+    var value: T?
+        get() = trace("value") { persister.get() }
+        private set(value) {
+            persister.put(value)
+            scope.launch {
+                valueChannel.send(persister.get())
+            }
+        }
 
-    /**
-     * Synchronously grab the latest cached version of the data.
-     */
-    @JsName("peek")
-    fun peek(): T?
+    val state: BismarckState get() = trace("state") {
+        when {
+            fetchCount.get() > 0 -> BismarckState.Fetching
+            isFresh -> BismarckState.Fresh
+            else -> Stale
+        }
+    }
 
-    /**
-     * Synchronously grab the latest version of the bismarck state.
-     */
-    @JsName("peekState")
-    fun peekState(): BismarckState
+    var error: Exception? = null
+        private set(value) {
+            field = value
+            scope.launch {
+                errorChannel.send(field)
+            }
+        }
 
-    /**
-     * The bismarck will usually employ some sort of timer or hash comparison to determine this.
-     * Can also call [invalidate] to force this to false.
-     */
-    @JsName("isFresh")
-    fun isFresh(): Boolean
+    val isFresh: Boolean get() = trace("isFresh") {
+        rateLimiter?.isFresh() ?: false
+    }
 
-    /**
-     * Should cause [isFresh] to return false.
-     */
-    @JsName("invalidate")
-    fun invalidate()
+    private val fetchCount = AtomicInt(0)
 
-    /**
-     * Trigger asyncFetch of this and all dependencies where [isFresh] is false.
-     */
-    @JsName("refresh")
-    fun refresh()
+    val valueChannel by lazy { ConflatedBroadcastChannel(value) }
+    val stateChannel by lazy { ConflatedBroadcastChannel(state) }
+    val errorChannel by lazy { ConflatedBroadcastChannel(error) }
 
-    /**
-     * FIFO executed just after data insertion and before dependent invalidation
-     */
-    @JsName("addListener")
-    fun addListener(listener: Listener<T>): Bismarck<T>
+    init {
+        trace("init") {
+            scope.launch {
+                trace("init in scope") {
+                    valueChannel.send(value)
+                    stateChannel.send(state)
+                    errorChannel.send(error)
+                }
+            }
+        }
+    }
 
-    /**
-     * Remove a previously added listener
-     */
-    @JsName("removeListener")
-    fun removeListener(listener: Listener<T>): Bismarck<T>
+    fun insert(value: T?) = trace("insert") {
+        this.value = value
+        rateLimiter?.update()
+        updateState()
+    }
 
-    /**
-     * FIFO executed just after data insertion and before dependent invalidation
-     */
-    @JsName("addTransform")
-    fun addTransform(transform: Transform<T>): Bismarck<T>
+    fun invalidate() = trace("invalidate") {
+        rateLimiter?.reset()
+        fetch()
+    }
 
-    /**
-     * Remove a previously added listener
-     */
-    @JsName("removeTransform")
-    fun removeTransform(transform: Transform<T>): Bismarck<T>
+    override fun close() {
+        valueChannel.close()
+        stateChannel.close()
+        errorChannel.close()
+    }
 
-    /**
-     * Dependency chaining. Does not detect circular references, so be careful.
-     */
-    @JsName("addDependent")
-    fun addDependent(other: Bismarck<*>): Bismarck<T>
+    private fun fetch() = trace("fetch") {
+        val fetcher = fetcher ?: return@trace
+        fetchCount.incrementAndGet()
+        updateState()
+        scope.launch {
+            trace("fetch in scope") {
+                try {
+                    val fetched = fetcher.doFetch()
+                    insert(fetched)
+                    fetchCount.decrementAndGet()
+                    updateState()
+                    error = null
+                } catch (e: Exception) {
+                    log { "Received error: $e" }
+                    error = e
+                }
+            }
+        }
+    }
 
-    /**
-     * Dependency chaining. Does not detect circular references, so be careful.
-     */
-    @JsName("removeDependent")
-    fun removeDependent(other: Bismarck<*>): Bismarck<T>
+    private fun updateState() = trace("updateState") {
+        scope.launch {
+            trace("updateState in scope") {
+                stateChannel.send(state)
+            }
+        }
+    }
 
-    /**
-     * Type-agnostic method for clearing data,
-     * since logouts will often cause this to happen in a foreach loop.
-     */
-    @JsName("clear")
-    fun clear() = insert(null)
+    private var indent = 0
+    private inline fun log(msg: () -> String) {
+        if (this.config.debug) {
+            println(buildString {
+                (0 until indent).forEach {
+                    append(" ")
+                }
+                append(msg())
+            })
+        }
+    }
 
-    /**
-     * Sometimes you do bad things and the data gets changed without an [insert] call. Shame on you.
-     */
-    @JsName("notifyChanged")
-    fun notifyChanged()
+    private inline fun <T> trace(msg: String, fn: () -> T): T {
+        indent += 1
+        log { msg }
+        val retval = fn()
+//        log { "$msg = $retval" }
+        indent -= 1
+        return retval
+    }
 }

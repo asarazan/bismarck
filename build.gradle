@@ -23,6 +23,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+        classpath "org.jlleitschuh.gradle:ktlint-gradle:$KTLINT_VERSION"
     }
 }
 
@@ -31,4 +32,7 @@ allprojects {
         mavenLocal()
         jcenter()
     }
+
+    apply plugin: "org.jlleitschuh.gradle.ktlint"
+    apply plugin: "org.jlleitschuh.gradle.ktlint-idea"
 }

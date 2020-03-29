@@ -3,7 +3,7 @@ package net.sarazan.bismarck.persisters
 import net.sarazan.bismarck.Serializer
 import net.sarazan.bismarck.platform.getFile
 
-class FilePersister<T: Any>(
+class FilePersister<T : Any>(
     val root: String,
     var path: String?,
     val serializer: Serializer<T>

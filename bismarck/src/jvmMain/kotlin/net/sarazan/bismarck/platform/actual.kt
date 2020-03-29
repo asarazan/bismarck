@@ -1,8 +1,8 @@
 package net.sarazan.bismarck.platform
 
-import net.sarazan.bismarck.platform.files.FileLike
 import java.io.Closeable
 import kotlin.jvm.Throws
+import net.sarazan.bismarck.platform.files.FileLike
 
 actual typealias Throws = Throws
 

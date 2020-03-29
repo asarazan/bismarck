@@ -1,9 +1,9 @@
 package net.sarazan.bismarck.platform
 
-import net.sarazan.bismarck.platform.files.FileLike
 import kotlin.native.Throws
 import kotlin.system.getTimeMillis
 import kotlin.system.getTimeNanos
+import net.sarazan.bismarck.platform.files.FileLike
 
 actual typealias Throws = Throws
 

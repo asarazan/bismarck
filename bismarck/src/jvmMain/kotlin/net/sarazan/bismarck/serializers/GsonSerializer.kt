@@ -35,7 +35,7 @@ package net.sarazan.bismarck.serializers
 import com.google.gson.Gson
 import net.sarazan.bismarck.Serializer
 
-class GsonSerializer<T: Any>(private val cls: Class<T>, private val gson: Gson) :
+class GsonSerializer<T : Any>(private val cls: Class<T>, private val gson: Gson) :
     Serializer<T> {
 
     override fun serialize(data: T): ByteArray {

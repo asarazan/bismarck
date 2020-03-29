@@ -1,8 +1,8 @@
 package net.sarazan.bismarck.platform
 
-import net.sarazan.bismarck.platform.files.FileLike
 import kotlin.js.Date
 import kotlin.reflect.KClass
+import net.sarazan.bismarck.platform.files.FileLike
 
 actual fun currentTimeMillis(): Long = Date.now().toLong()
 actual fun currentTimeNano(): Long = (Date.now() * 1000.0).toLong()

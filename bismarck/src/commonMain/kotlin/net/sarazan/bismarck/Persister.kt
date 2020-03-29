@@ -16,8 +16,7 @@
 
 package net.sarazan.bismarck
 
-
-interface Persister<T: Any> {
+interface Persister<T : Any> {
     fun get(): T?
     fun put(data: T?)
 }

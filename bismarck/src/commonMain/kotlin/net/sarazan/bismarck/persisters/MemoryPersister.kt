@@ -18,8 +18,7 @@ package net.sarazan.bismarck.persisters
 
 import net.sarazan.bismarck.Persister
 
-
-open class MemoryPersister<T: Any>(var cached: T? = null) : Persister<T> {
+open class MemoryPersister<T : Any>(var cached: T? = null) : Persister<T> {
     override fun get(): T? = cached
     override fun put(data: T?) {
         cached = data

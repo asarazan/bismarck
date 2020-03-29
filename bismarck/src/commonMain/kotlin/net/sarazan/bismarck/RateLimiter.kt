@@ -16,7 +16,6 @@
 
 package net.sarazan.bismarck
 
-
 interface RateLimiter {
 
     val lastReset: Long

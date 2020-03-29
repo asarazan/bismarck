@@ -1,7 +1,7 @@
 package net.sarazan.bismarck.platform
 
-import net.sarazan.bismarck.platform.files.FileLike
 import java.io.File
+import net.sarazan.bismarck.platform.files.FileLike
 
 class JavaFile(private val file: File) : FileLike {
 

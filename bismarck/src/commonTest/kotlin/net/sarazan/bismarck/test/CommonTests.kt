@@ -1,23 +1,27 @@
 package net.sarazan.bismarck.test
 
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.consumeEach
-import net.sarazan.bismarck.BismarckState
-import net.sarazan.bismarck.BismarckState.*
-import net.sarazan.bismarck.NuBismarck
-import net.sarazan.bismarck.persisters.MemoryPersister
-import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.consumeEach
+import net.sarazan.bismarck.Bismarck
+import net.sarazan.bismarck.BismarckState
+import net.sarazan.bismarck.BismarckState.*
+import net.sarazan.bismarck.persisters.MemoryPersister
+import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
+
+val debugLogs = false
+val shouldDedupe = false
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
-class JvmTests {
+class CommonTests {
 
     @Test
-    fun testInsert() = runBlocking {
-        val bismarck = NuBismarck<String> {
-            debug = true
+    fun testInsert() = runBlockingTest {
+        val bismarck = Bismarck<String> {
+            debug = debugLogs
+            dedupe = shouldDedupe
         }
         assertEquals(null, bismarck.value)
         bismarck.insert("Foo")
@@ -25,9 +29,10 @@ class JvmTests {
     }
 
     @Test
-    fun testFreshness() = runBlocking {
-        val bismarck = NuBismarck<String> {
-            debug = true
+    fun testFreshness() = runBlockingTest {
+        val bismarck = Bismarck<String> {
+            debug = debugLogs
+            dedupe = shouldDedupe
             rateLimiter = SimpleRateLimiter(100)
         }
         assertEquals(Stale, bismarck.state)
@@ -42,11 +47,12 @@ class JvmTests {
     }
 
     @Test
-    fun testFetch() = runBlocking {
-        val bismarck = NuBismarck<String> {
-            debug = true
+    fun testFetch() = runBlockingTest {
+        val bismarck = Bismarck<String> {
+            debug = debugLogs
+            dedupe = shouldDedupe
             rateLimiter = SimpleRateLimiter(100)
-            fetcher = {
+            fetch = {
                 delay(100)
                 "Foo"
             }
@@ -64,25 +70,28 @@ class JvmTests {
     }
 
     @Test
-    fun testPersisterInit() = runBlocking {
+    fun testPersisterInit() = runBlockingTest {
         val persister = MemoryPersister<String>()
-        var bismarck = NuBismarck<String> {
-            debug = true
+        var bismarck = Bismarck<String> {
+            debug = debugLogs
+            dedupe = shouldDedupe
             this.persister = persister
         }
         bismarck.insert("Foo")
-        bismarck = NuBismarck {
-            debug = true
+        bismarck = Bismarck {
+            debug = debugLogs
+            dedupe = shouldDedupe
             this.persister = persister
         }
         assertEquals("Foo", bismarck.value)
     }
 
     @Test
-    fun testDataChannel() = runBlocking {
+    fun testDataChannel() = runBlockingTest {
         var received: String? = null
-        val bismarck = NuBismarck<String> {
-            debug = true
+        val bismarck = Bismarck<String> {
+            debug = debugLogs
+            dedupe = shouldDedupe
         }
         GlobalScope.launch {
             bismarck.valueChannel.consumeEach {
@@ -96,12 +105,13 @@ class JvmTests {
     }
 
     @Test
-    fun testStateChannel() = runBlocking {
+    fun testStateChannel() = runBlockingTest {
         var received: BismarckState? = null
-        val bismarck = NuBismarck<String> {
-            debug = true
+        val bismarck = Bismarck<String> {
+            debug = debugLogs
+            dedupe = shouldDedupe
             rateLimiter = SimpleRateLimiter(100)
-            fetcher = {
+            fetch = {
                 delay(100)
                 "Foo"
             }
@@ -119,5 +129,32 @@ class JvmTests {
         assertEquals(Fetching, received)
         delay(100)
         assertEquals(Fresh, received)
+    }
+
+    @Test
+    fun testError() = runBlockingTest {
+        val exception = RuntimeException("Foo")
+        var received: Exception? = null
+        val bismarck = Bismarck<String> {
+            debug = debugLogs
+            dedupe = shouldDedupe
+            fetch = {
+                delay(100)
+                throw exception
+            }
+        }
+        GlobalScope.launch {
+            bismarck.errorChannel.consumeEach {
+                received = it
+            }
+        }
+        assertEquals(null, bismarck.error)
+        assertEquals(null, received)
+        bismarck.invalidate()
+        assertEquals(null, bismarck.error)
+        assertEquals(null, received)
+        delay(200)
+        assertEquals(exception, bismarck.error)
+        assertEquals(exception, received)
     }
 }
