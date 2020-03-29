@@ -18,9 +18,9 @@ package net.sarazan.bismarck
 
 interface RateLimiter {
 
-    val lastReset: Long
+    val resetNanos: Long
 
-    fun update()
+    fun update(requestNanos: Long)
     fun reset()
     fun isFresh(): Boolean
 }

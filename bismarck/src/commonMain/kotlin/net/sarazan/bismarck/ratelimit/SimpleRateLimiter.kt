@@ -24,22 +24,27 @@ class SimpleRateLimiter(val ms: Long) : RateLimiter {
     /**
      * Uses [System.nanoTime]
      */
-    var lastRun: Long = 0
+    var lastRunNanos: Long = 0
         private set
 
     /**
      * Uses [System.nanoTime]
      */
-    override var lastReset: Long = 0
+    override var resetNanos: Long = 0
         private set
 
-    override fun update() {
-        lastRun = getCurrent()
+    /**
+     *
+     */
+    override fun update(requestNanos: Long) {
+        if (requestNanos >= resetNanos) {
+            lastRunNanos = getCurrent()
+        }
     }
 
     override fun reset() {
-        lastRun = 0
-        lastReset = getCurrent()
+        lastRunNanos = 0
+        resetNanos = getCurrent()
     }
 
     override fun isFresh(): Boolean {
@@ -51,7 +56,7 @@ class SimpleRateLimiter(val ms: Long) : RateLimiter {
     }
 
     private fun pass(current: Long): Boolean {
-        val last = lastRun
+        val last = lastRunNanos
         val ns = ms * 1_000_000
         return last == 0L || current - last >= ns
     }

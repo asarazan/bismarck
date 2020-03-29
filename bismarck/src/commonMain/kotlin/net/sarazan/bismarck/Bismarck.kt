@@ -1,22 +1,18 @@
 package net.sarazan.bismarck
 
 import co.touchlab.stately.concurrency.AtomicInt
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.launch
 import net.sarazan.bismarck.BismarckState.Stale
 import net.sarazan.bismarck.fetch.Fetch
-import net.sarazan.bismarck.fetch.Fetcher
 import net.sarazan.bismarck.persisters.MemoryPersister
 import net.sarazan.bismarck.platform.Closeable
+import net.sarazan.bismarck.platform.currentTimeNano
 
 data class BismarckConfig<T : Any>(
     var fetch: Fetch<T>? = null,
     var rateLimiter: RateLimiter? = null,
     var persister: Persister<T> = MemoryPersister(),
-    var dedupe: Boolean = true,
     var scope: CoroutineScope = GlobalScope,
     var debug: Boolean = false
 )
@@ -25,29 +21,32 @@ data class BismarckConfig<T : Any>(
 class Bismarck<T : Any>(private val config: BismarckConfig<T>) : Closeable {
     constructor(config: BismarckConfig<T>.() -> Unit = {}) : this(BismarckConfig<T>().apply(config))
 
+    val fetch get() = this.config.fetch
     val rateLimiter get() = this.config.rateLimiter
     val persister get() = this.config.persister
     val scope get() = this.config.scope
-    val fetcher = Fetcher.get(this.config.fetch, rateLimiter, this.config.dedupe)
 
     var value: T?
         get() = trace("value") { persister.get() }
-        private set(value) {
+        private set(value) = trace("setValue $value") {
             persister.put(value)
             scope.launch {
                 valueChannel.send(persister.get())
             }
         }
 
-    val state: BismarckState get() = trace("state") {
-        when {
-            fetchCount.get() > 0 -> BismarckState.Fetching
-            isFresh -> BismarckState.Fresh
-            else -> Stale
-        }
+    val state: BismarckState get() = when {
+        fetchCount > 0 -> BismarckState.Fetching
+        isFresh -> BismarckState.Fresh
+        else -> Stale
+    }.apply {
+        log { "getState: $this" }
     }
 
     var error: Exception? = null
+        get() = field.apply {
+            log { "getException: $this" }
+        }
         private set(value) {
             field = value
             scope.launch {
@@ -59,7 +58,9 @@ class Bismarck<T : Any>(private val config: BismarckConfig<T>) : Closeable {
         rateLimiter?.isFresh() ?: false
     }
 
-    private val fetchCount = AtomicInt(0)
+    val fetchCount get() = _fetchCount.get()
+    private val _fetchCount = AtomicInt(0)
+    private var fetchJob: Job? = null
 
     val valueChannel by lazy { ConflatedBroadcastChannel(value) }
     val stateChannel by lazy { ConflatedBroadcastChannel(state) }
@@ -77,10 +78,8 @@ class Bismarck<T : Any>(private val config: BismarckConfig<T>) : Closeable {
         }
     }
 
-    fun insert(value: T?) = trace("insert") {
-        this.value = value
-        rateLimiter?.update()
-        updateState()
+    fun insert(value: T?) {
+        insert(value, currentTimeNano())
     }
 
     fun invalidate() = trace("invalidate") {
@@ -94,24 +93,33 @@ class Bismarck<T : Any>(private val config: BismarckConfig<T>) : Closeable {
         errorChannel.close()
     }
 
-    private fun fetch() = trace("fetch") {
-        val fetcher = fetcher ?: return@trace
-        fetchCount.incrementAndGet()
+    internal fun fetch() = trace("fetch") {
+        val fetch = fetch ?: return@trace
+        val time = currentTimeNano()
+        _fetchCount.incrementAndGet()
         updateState()
-        scope.launch {
-            trace("fetch in scope") {
-                try {
-                    val fetched = fetcher.doFetch()
-                    insert(fetched)
-                    fetchCount.decrementAndGet()
-                    updateState()
+        val job = fetchJob
+        fetchJob = scope.launch {
+            job?.join()
+            try {
+                if (rateLimiter?.isFresh() != true) {
+                    insert(fetch.invoke(), time)
                     error = null
-                } catch (e: Exception) {
-                    log { "Received error: $e" }
-                    error = e
                 }
+            } catch (e: Exception) {
+                log { "Received error: $e" }
+                error = e
+            } finally {
+                _fetchCount.decrementAndGet()
+                updateState()
             }
         }
+    }
+
+    private fun insert(value: T?, timestamp: Long) = trace("insert $value ($timestamp)") {
+        this.value = value
+        rateLimiter?.update(timestamp)
+        updateState()
     }
 
     private fun updateState() = trace("updateState") {
