@@ -1,21 +1,13 @@
 package net.sarazan.bismarck
 
 import co.touchlab.stately.concurrency.AtomicInt
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.launch
 import net.sarazan.bismarck.BismarckState.Stale
-import net.sarazan.bismarck.fetch.Fetch
-import net.sarazan.bismarck.persisters.MemoryPersister
 import net.sarazan.bismarck.platform.Closeable
 import net.sarazan.bismarck.platform.currentTimeNano
-
-data class BismarckConfig<T : Any>(
-    var fetch: Fetch<T>? = null,
-    var rateLimiter: RateLimiter? = null,
-    var persister: Persister<T> = MemoryPersister(),
-    var scope: CoroutineScope = GlobalScope,
-    var debug: Boolean = false
-)
 
 @ExperimentalCoroutinesApi
 class Bismarck<T : Any>(private val config: BismarckConfig<T>) : Closeable {
