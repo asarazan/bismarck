@@ -23,10 +23,6 @@ def ideaActive = System.getProperty('idea.active') == 'true'
 
 kotlin {
     jvm()
-    js() {
-        nodejs()
-    }
-
     if (ideaActive) {
         println("Configuring single iosx64 target")
         iosX64("ios") {
@@ -85,20 +81,6 @@ kotlin {
             }
         }
 
-        jsMain {
-            dependsOn commonMain
-            dependencies {
-                implementation kotlin("stdlib-js")
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$COROUTINES_VERSION"
-            }
-        }
-        jsTest {
-            dependsOn commonTest
-            dependencies {
-                implementation kotlin("test-js")
-            }
-        }
-
         iosMain {
             dependsOn commonMain
             dependencies {
@@ -115,4 +97,4 @@ configurations {
 }
 
 apply from: "${rootDir}/gradle/gradle-mvn-mpp-push.gradle"
-apply from: "${rootDir}/gradle/npm-publish.gradle"
+//apply from: "${rootDir}/gradle/npm-publish.gradle"

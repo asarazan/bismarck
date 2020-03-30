@@ -4,16 +4,14 @@ import net.sarazan.bismarck.Serializer
 import net.sarazan.bismarck.platform.getFile
 
 class FilePersister<T : Any>(
-    val root: String,
-    var path: String?,
+    val path: String,
     val serializer: Serializer<T>
 ) : MemoryPersister<T>() {
 
     override fun get(): T? {
-        val path = path ?: return null
         val cached = super.get()
         if (cached != null) return cached
-        val file = getFile(root, path)
+        val file = getFile(path)
         if (!file.exists) return null
         val loaded = serializer.deserialize(file.readBytes())
         super.put(loaded)
@@ -21,9 +19,8 @@ class FilePersister<T : Any>(
     }
 
     override fun put(data: T?) {
-        val path = path ?: return
         super.put(data)
-        val file = getFile(root, path)
+        val file = getFile(path)
         if (data == null) {
             file.delete()
         } else {

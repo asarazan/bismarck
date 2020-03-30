@@ -146,4 +146,35 @@ class CommonTests {
         assertEquals(exception, bismarck.error)
         assertEquals(exception, received)
     }
+
+    @Test
+    fun testDedupe() = runBlockingTest {
+        var counter = 0
+        val bismarck = Bismarck<String> {
+            debug = shouldDebug
+            rateLimiter = SimpleRateLimiter(1000)
+            fetch = {
+                delay(100)
+                "Foob-${counter++}"
+            }
+        }
+        assertEquals(Stale, bismarck.state)
+        bismarck.invalidate()
+        assertEquals(Fetching, bismarck.state)
+        delay(150)
+        assertEquals(Fresh, bismarck.state)
+        assertEquals("Foob-0", bismarck.value)
+        bismarck.invalidate()
+        assertEquals(Fetching, bismarck.state)
+        delay(90)
+        assertEquals(Fetching, bismarck.state)
+        assertEquals("Foob-0", bismarck.value)
+        bismarck.invalidate()
+        delay(50)
+        assertEquals(Fetching, bismarck.state)
+        assertEquals("Foob-1", bismarck.value)
+        delay(100)
+        assertEquals(Fresh, bismarck.state)
+        assertEquals("Foob-2", bismarck.value)
+    }
 }

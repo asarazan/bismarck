@@ -1,5 +1,3 @@
-rootProject.name = 'bismarck-parent'
-
 include 'bismarck'
 
 enableFeaturePreview('GRADLE_METADATA')
