@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-package net.sarazan.bismarck.serializers
+package net.sarazan.bismarck.ratelimit
 
-import com.squareup.wire.Message
-import com.squareup.wire.ProtoAdapter
-import net.sarazan.bismarck.Serializer
-
-class WireSerializer<T : Message<T, *>>(val cls: Class<T>) : Serializer<T> {
-
-    override fun deserialize(bytes: ByteArray): T? {
-        return ProtoAdapter.get(cls).decode(bytes)
-    }
-
-    override fun serialize(data: T): ByteArray {
-        return data.encode()
-    }
+interface RateLimiter {
+    val resetNanos: Long
+    fun update(requestNanos: Long)
+    fun reset()
+    fun isFresh(): Boolean
 }

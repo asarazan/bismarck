@@ -1,3 +1,3 @@
-package net.sarazan.bismarck.fetch
+package net.sarazan.bismarck
 
 typealias Fetch<T> = suspend () -> T?

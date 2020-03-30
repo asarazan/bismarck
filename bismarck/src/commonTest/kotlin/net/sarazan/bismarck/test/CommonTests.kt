@@ -7,8 +7,8 @@ import kotlinx.coroutines.channels.consumeEach
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.BismarckState
 import net.sarazan.bismarck.BismarckState.*
-import net.sarazan.bismarck.persisters.MemoryPersister
 import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
+import net.sarazan.bismarck.storage.MemoryStorage
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
@@ -65,15 +65,15 @@ class CommonTests {
 
     @Test
     fun testPersisterInit() = runBlockingTest {
-        val persister = MemoryPersister<String>()
+        val persister = MemoryStorage<String>()
         var bismarck = Bismarck<String> {
             debug = shouldDebug
-            this.persister = persister
+            this.storage = persister
         }
         bismarck.insert("Foo")
         bismarck = Bismarck {
             debug = shouldDebug
-            this.persister = persister
+            this.storage = persister
         }
         assertEquals("Foo", bismarck.value)
     }

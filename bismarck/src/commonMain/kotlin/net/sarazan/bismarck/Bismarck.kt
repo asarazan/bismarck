@@ -13,17 +13,17 @@ import net.sarazan.bismarck.platform.currentTimeNano
 class Bismarck<T : Any>(private val config: BismarckConfig<T>) : Closeable {
     constructor(config: BismarckConfig<T>.() -> Unit = {}) : this(BismarckConfig<T>().apply(config))
 
-    val fetch get() = this.config.fetch
+    val fetcher get() = this.config.fetch
     val rateLimiter get() = this.config.rateLimiter
-    val persister get() = this.config.persister
+    val storage get() = this.config.storage
     val scope get() = this.config.scope
 
     var value: T?
-        get() = trace("value") { persister.get() }
+        get() = trace("value") { storage.get() }
         private set(value) = trace("setValue $value") {
-            persister.put(value)
+            storage.put(value)
             scope.launch {
-                valueChannel.send(persister.get())
+                valueChannel.send(storage.get())
             }
         }
 
@@ -86,7 +86,7 @@ class Bismarck<T : Any>(private val config: BismarckConfig<T>) : Closeable {
     }
 
     internal fun fetch() = trace("fetch") {
-        val fetch = fetch ?: return@trace
+        val fetch = fetcher ?: return@trace
         val time = currentTimeNano()
         _fetchCount.incrementAndGet()
         updateState()

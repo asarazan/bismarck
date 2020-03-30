@@ -1,12 +1,11 @@
-package net.sarazan.bismarck.persisters
+package net.sarazan.bismarck.storage
 
-import net.sarazan.bismarck.Serializer
 import net.sarazan.bismarck.platform.getFile
 
-class FilePersister<T : Any>(
+class FileStorage<T : Any>(
     val path: String,
     val serializer: Serializer<T>
-) : MemoryPersister<T>() {
+) : MemoryStorage<T>() {
 
     override fun get(): T? {
         val cached = super.get()

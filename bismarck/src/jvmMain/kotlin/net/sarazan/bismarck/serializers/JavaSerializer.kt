@@ -17,7 +17,7 @@
 package net.sarazan.bismarck.serializers
 
 import java.io.*
-import net.sarazan.bismarck.Serializer
+import net.sarazan.bismarck.storage.Serializer
 
 class JavaSerializer<T : Serializable> : Serializer<T> {
 

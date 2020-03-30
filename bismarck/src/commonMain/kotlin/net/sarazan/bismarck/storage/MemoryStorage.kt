@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package net.sarazan.bismarck
+package net.sarazan.bismarck.storage
 
-interface Serializer<T : Any> {
-    fun deserialize(bytes: ByteArray): T?
-    fun serialize(data: T): ByteArray
+open class MemoryStorage<T : Any>(var cached: T? = null) : Storage<T> {
+    override fun get(): T? = cached
+    override fun put(data: T?) {
+        cached = data
+    }
 }

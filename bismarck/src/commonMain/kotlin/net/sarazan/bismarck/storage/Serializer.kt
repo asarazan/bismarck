@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package net.sarazan.bismarck.persisters
+package net.sarazan.bismarck.storage
 
-import net.sarazan.bismarck.Persister
-
-open class MemoryPersister<T : Any>(var cached: T? = null) : Persister<T> {
-    override fun get(): T? = cached
-    override fun put(data: T?) {
-        cached = data
-    }
+interface Serializer<T : Any> {
+    fun deserialize(bytes: ByteArray): T?
+    fun serialize(data: T): ByteArray
 }
