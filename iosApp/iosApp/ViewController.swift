@@ -7,7 +7,8 @@ class ViewController: UIViewController {
     let vm = FooViewModel()
         
     override func viewWillAppear(_ animated: Bool) {
-        vm.foo.onValue {
+        let bismarck = vm.foo
+        bismarck.onValue {
             it in
             self.label.text = "Hello and \(it ?? "null")"
         }

@@ -1,12 +1,14 @@
+package net.sarazan.bismarck.mobile
+
 import kotlin.native.concurrent.ThreadLocal
 import kotlinx.coroutines.*
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.platform.BismarckDispatchers
 import net.sarazan.bismarck.ratelimit.SimpleFreshness
 
-class FooViewModel(
-    private val scope: CoroutineScope = CoroutineScope(BismarckDispatchers.main)
-) {
+class FooViewModel(private val scope: CoroutineScope) {
+
+    constructor() : this(CoroutineScope(BismarckDispatchers.main))
 
     @ThreadLocal
     companion object {

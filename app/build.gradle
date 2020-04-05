@@ -11,7 +11,7 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId 'org.jetbrains.kotlin.mpp_app_android'
+        applicationId 'net.sarazan.bismarck.android'
         minSdkVersion 15
         targetSdkVersion 28
         versionCode 1
