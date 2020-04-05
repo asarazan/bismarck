@@ -1,14 +1,15 @@
 package net.sarazan.bismarck.test
 
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
+import net.sarazan.bismarck.platform.BismarckDispatchers
+
+private val scope = CoroutineScope(BismarckDispatchers.default)
 
 @ExperimentalCoroutinesApi
-actual fun runBlockingTest(
-    context: CoroutineContext,
-    testBody: suspend CoroutineScope.() -> Unit
-) {
-    runBlocking(context, testBody)
+actual fun runBlockingTest(testBody: suspend CoroutineScope.() -> Unit) {
+    scope.launch {
+        testBody()
+    }
 }
