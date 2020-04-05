@@ -1,6 +1,7 @@
 package net.sarazan.bismarck.platform
 
 import kotlin.reflect.KClass
+import kotlinx.coroutines.CoroutineDispatcher
 import net.sarazan.bismarck.platform.files.FileLike
 
 expect interface Closeable {
@@ -14,3 +15,12 @@ expect fun currentTimeNano(): Long
 expect annotation class Throws(vararg val exceptionClasses: KClass<out Throwable>)
 
 expect fun getFile(root: String, child: String? = null): FileLike
+
+expect object BismarckDispatchers {
+    val default: CoroutineDispatcher
+    val main: CoroutineDispatcher
+}
+
+fun logError(name: String, message: String, err: Throwable) {
+    println("[$name] $message\n$err")
+}

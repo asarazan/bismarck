@@ -18,7 +18,7 @@ package net.sarazan.bismarck.ratelimit
 
 import net.sarazan.bismarck.platform.currentTimeNano
 
-class SimpleRateLimiter(val ms: Long) : RateLimiter {
+class SimpleFreshness(val ms: Long) : Freshness {
 
     /**
      * Uses [System.nanoTime]

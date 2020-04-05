@@ -51,7 +51,7 @@ kotlin {
                 implementation "co.touchlab:stately-concurrency:$STATELY_VERSION"
                 implementation "co.touchlab:stately-isolate:$STATELY_VERSION"
                 implementation "co.touchlab:stately-iso-collections:$STATELY_VERSION"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$COROUTINES_VERSION"
+                api "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$COROUTINES_VERSION"
             }
         }
 
@@ -59,7 +59,7 @@ kotlin {
             dependencies {
                 implementation kotlin("test-common")
                 implementation kotlin("test-annotations-common")
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$COROUTINES_VERSION"
+                api "org.jetbrains.kotlinx:kotlinx-coroutines-test:$COROUTINES_VERSION"
             }
         }
 
@@ -67,7 +67,7 @@ kotlin {
             dependsOn commonMain
             dependencies {
                 implementation kotlin("stdlib-jdk8")
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$COROUTINES_VERSION"
+                api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$COROUTINES_VERSION"
             }
         }
         jvmTest {
@@ -81,7 +81,7 @@ kotlin {
         iosMain {
             dependsOn commonMain
             dependencies {
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:$COROUTINES_VERSION"
+                api "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:$COROUTINES_VERSION"
             }
         }
 

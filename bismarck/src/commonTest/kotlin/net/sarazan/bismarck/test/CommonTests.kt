@@ -3,11 +3,10 @@ package net.sarazan.bismarck.test
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.consumeEach
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.BismarckState
 import net.sarazan.bismarck.BismarckState.*
-import net.sarazan.bismarck.ratelimit.SimpleRateLimiter
+import net.sarazan.bismarck.ratelimit.SimpleFreshness
 import net.sarazan.bismarck.storage.MemoryStorage
 
 @ObsoleteCoroutinesApi
@@ -16,8 +15,8 @@ class CommonTests {
 
     @Test
     fun testInsert() = runBlockingTest {
-        val bismarck = Bismarck<String> {
-            debug = shouldDebug
+        val bismarck = Bismarck.create<String> {
+            logDebug = shouldDebug
             }
         assertEquals(null, bismarck.value)
         bismarck.insert("Foo")
@@ -26,9 +25,9 @@ class CommonTests {
 
     @Test
     fun testFreshness() = runBlockingTest {
-        val bismarck = Bismarck<String> {
-            debug = shouldDebug
-            rateLimiter = SimpleRateLimiter(100)
+        val bismarck = Bismarck.create<String> {
+            logDebug = shouldDebug
+            freshness = SimpleFreshness(100)
         }
         assertEquals(Stale, bismarck.state)
         bismarck.insert("Foo")
@@ -43,10 +42,10 @@ class CommonTests {
 
     @Test
     fun testFetch() = runBlockingTest {
-        val bismarck = Bismarck<String> {
-            debug = shouldDebug
-            rateLimiter = SimpleRateLimiter(100)
-            fetch = {
+        val bismarck = Bismarck.create<String> {
+            logDebug = shouldDebug
+            freshness = SimpleFreshness(100)
+            fetcher = {
                 delay(100)
                 "Foo"
             }
@@ -66,13 +65,13 @@ class CommonTests {
     @Test
     fun testPersisterInit() = runBlockingTest {
         val persister = MemoryStorage<String>()
-        var bismarck = Bismarck<String> {
-            debug = shouldDebug
+        var bismarck = Bismarck.create<String> {
+            logDebug = shouldDebug
             this.storage = persister
         }
         bismarck.insert("Foo")
-        bismarck = Bismarck {
-            debug = shouldDebug
+        bismarck = Bismarck.create {
+            logDebug = shouldDebug
             this.storage = persister
         }
         assertEquals("Foo", bismarck.value)
@@ -81,11 +80,11 @@ class CommonTests {
     @Test
     fun testDataChannel() = runBlockingTest {
         var received: String? = null
-        val bismarck = Bismarck<String> {
-            debug = shouldDebug
+        val bismarck = Bismarck.create<String> {
+            logDebug = shouldDebug
             }
         GlobalScope.launch {
-            bismarck.valueChannel.consumeEach {
+            bismarck.eachValue {
                 received = it
             }
         }
@@ -98,16 +97,16 @@ class CommonTests {
     @Test
     fun testStateChannel() = runBlockingTest {
         var received: BismarckState? = null
-        val bismarck = Bismarck<String> {
-            debug = shouldDebug
-            rateLimiter = SimpleRateLimiter(100)
-            fetch = {
+        val bismarck = Bismarck.create<String> {
+            logDebug = shouldDebug
+            freshness = SimpleFreshness(100)
+            fetcher = {
                 delay(100)
                 "Foo"
             }
         }
         GlobalScope.launch {
-            bismarck.stateChannel.consumeEach {
+            bismarck.eachState {
                 received = it
             }
         }
@@ -125,15 +124,15 @@ class CommonTests {
     fun testError() = runBlockingTest {
         val exception = RuntimeException("Foo")
         var received: Exception? = null
-        val bismarck = Bismarck<String> {
-            debug = shouldDebug
-            fetch = {
+        val bismarck = Bismarck.create<String> {
+            logDebug = shouldDebug
+            fetcher = {
                 delay(100)
                 throw exception
             }
         }
         GlobalScope.launch {
-            bismarck.errorChannel.consumeEach {
+            bismarck.eachError {
                 received = it
             }
         }
@@ -150,10 +149,10 @@ class CommonTests {
     @Test
     fun testDedupe() = runBlockingTest {
         var counter = 0
-        val bismarck = Bismarck<String> {
-            debug = shouldDebug
-            rateLimiter = SimpleRateLimiter(1000)
-            fetch = {
+        val bismarck = Bismarck.create<String> {
+            logDebug = shouldDebug
+            freshness = SimpleFreshness(1000)
+            fetcher = {
                 delay(100)
                 "Foob-${counter++}"
             }

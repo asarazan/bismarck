@@ -17,6 +17,7 @@
 buildscript {
     repositories {
         jcenter()
+        google()
         gradlePluginPortal()
     }
 
@@ -24,6 +25,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
         classpath "org.jlleitschuh.gradle:ktlint-gradle:$KTLINT_VERSION"
+        classpath 'com.android.tools.build:gradle:3.6.0'
     }
 }
 
