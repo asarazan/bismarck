@@ -13,7 +13,7 @@ class RescopedBismarck<T : Any>(
             parent.eachValue(fn)
         }
     }
-    fun onState(fn: (BismarckState?) -> Unit) {
+    fun onState(fn: (Bismarck.State?) -> Unit) {
         scope.launch {
             parent.eachState(fn)
         }

@@ -7,12 +7,13 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
-import net.sarazan.bismarck.BismarckState.Stale
+import net.sarazan.bismarck.Bismarck.State.Fresh
+import net.sarazan.bismarck.Bismarck.State.Stale
 import net.sarazan.bismarck.platform.currentTimeNano
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
-class DefaultBismarck<T : Any>(private val config: BismarckConfig<T>) : Bismarck<T> {
+class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarck<T> {
 
     override var value: T?
         get() = storage.get()
@@ -23,9 +24,9 @@ class DefaultBismarck<T : Any>(private val config: BismarckConfig<T>) : Bismarck
             }
         }
 
-    override val state: BismarckState get() = when {
-        _fetchCount.get() > 0 -> BismarckState.Fetching
-        freshness?.isFresh() ?: false -> BismarckState.Fresh
+    override val state: Bismarck.State get() = when {
+        _fetchCount.get() > 0 -> Bismarck.State.Fetching
+        freshness?.isFresh() ?: false -> Bismarck.State.Fresh
         else -> Stale
     }
 
@@ -63,7 +64,7 @@ class DefaultBismarck<T : Any>(private val config: BismarckConfig<T>) : Bismarck
     override suspend fun eachValue(fn: (T?) -> Unit) {
         valueChannel.consumeEach(fn)
     }
-    override suspend fun eachState(fn: (BismarckState?) -> Unit) {
+    override suspend fun eachState(fn: (Bismarck.State?) -> Unit) {
         stateChannel.consumeEach(fn)
     }
     override suspend fun eachError(fn: (Exception?) -> Unit) {
@@ -71,7 +72,7 @@ class DefaultBismarck<T : Any>(private val config: BismarckConfig<T>) : Bismarck
     }
 
     override fun check() {
-        if (state == Stale) {
+        if (freshness?.isFresh() != true) {
             fetch()
         }
     }

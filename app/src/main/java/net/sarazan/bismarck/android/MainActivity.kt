@@ -1,10 +1,10 @@
 package net.sarazan.bismarck.android
 
-import FooViewModel
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.activity_main.*
+import net.sarazan.bismarck.mobile.FooViewModel
 import sample.R
 
 class MainActivity : AppCompatActivity() {
