@@ -14,4 +14,9 @@
  * limitations under the License.
  */
 
-package net.sarazan.bismarck
+package net.sarazan.bismarck.storage
+
+interface Storage<T : Any> {
+    fun get(): T?
+    fun put(data: T?)
+}

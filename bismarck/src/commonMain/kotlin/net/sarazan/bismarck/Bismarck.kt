@@ -1,98 +1,51 @@
-/*
- * Copyright 2019 The Bismarck Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package net.sarazan.bismarck
 
+import kotlinx.coroutines.CoroutineScope
+import net.sarazan.bismarck.platform.BismarckDispatchers
 import net.sarazan.bismarck.platform.Closeable
+import net.sarazan.bismarck.ratelimit.Freshness
+import net.sarazan.bismarck.storage.MemoryStorage
+import net.sarazan.bismarck.storage.Storage
+
+typealias Fetcher<T> = suspend () -> T?
 
 interface Bismarck<T : Any> : Closeable {
 
-    fun consumeEachData(action: (T?) -> Unit)
+    data class Config<T : Any>(
+        var fetcher: Fetcher<T>? = null,
+        var freshness: Freshness? = null,
+        var storage: Storage<T> = MemoryStorage(),
+        var scope: CoroutineScope = CoroutineScope(BismarckDispatchers.default),
+        var checkOnLaunch: Boolean = false
+    )
 
-    fun consumeEachState(action: (BismarckState?) -> Unit)
+    enum class State {
+        Fresh,
+        Stale,
+        Fetching
+    }
 
-    /**
-     * Manually set the data of the bismarck.
-     */
-    fun insert(data: T?)
+    val value: T?
+    val state: State
+    val error: Exception?
 
-    /**
-     * Synchronously grab the latest cached version of the data.
-     */
-    fun peek(): T?
+    suspend fun eachValue(fn: (T?) -> Unit)
+    suspend fun eachState(fn: (State?) -> Unit)
+    suspend fun eachError(fn: (Exception?) -> Unit)
 
-    /**
-     * Synchronously grab the latest version of the bismarck state.
-     */
-    fun peekState(): BismarckState
-
-    /**
-     * The bismarck will usually employ some sort of timer or hash comparison to determine this.
-     * Can also call [invalidate] to force this to false.
-     */
-    fun isFresh(): Boolean
-
-    /**
-     * Should cause [isFresh] to return false.
-     */
+    fun check()
+    fun insert(value: T?)
     fun invalidate()
+    fun clear()
 
-    /**
-     * Trigger asyncFetch of this and all dependencies where [isFresh] is false.
-     */
-    fun refresh()
+    fun rescope(scope: CoroutineScope) = RescopedBismarck(this, scope)
 
-    /**
-     * FIFO executed just after data insertion and before dependent invalidation
-     */
-    fun addListener(listener: Listener<T>): Bismarck<T>
-
-    /**
-     * Remove a previously added listener
-     */
-    fun removeListener(listener: Listener<T>): Bismarck<T>
-
-    /**
-     * FIFO executed just after data insertion and before dependent invalidation
-     */
-    fun addTransform(transform: Transform<T>): Bismarck<T>
-
-    /**
-     * Remove a previously added listener
-     */
-    fun removeTransform(transform: Transform<T>): Bismarck<T>
-
-    /**
-     * Dependency chaining. Does not detect circular references, so be careful.
-     */
-    fun addDependent(other: Bismarck<*>): Bismarck<T>
-
-    /**
-     * Dependency chaining. Does not detect circular references, so be careful.
-     */
-    fun removeDependent(other: Bismarck<*>): Bismarck<T>
-
-    /**
-     * Type-agnostic method for clearing data,
-     * since logouts will often cause this to happen in a foreach loop.
-     */
-    fun clear() = insert(null)
-
-    /**
-     * Sometimes you do bad things and the data gets changed without an [insert] call. Shame on you.
-     */
-    fun notifyChanged()
+    companion object {
+        fun <T : Any> create(config: Config<T>): Bismarck<T> {
+            return DefaultBismarck(config)
+        }
+        fun <T : Any> create(config: Config<T>.() -> Unit = {}): Bismarck<T> {
+            return create(Config<T>().apply(config))
+        }
+    }
 }
