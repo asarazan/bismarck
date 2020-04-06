@@ -22,7 +22,7 @@ class FileStorageTests {
     @Test
     fun testFileValue() {
         var bismarck = Bismarck.create<String> {
-            storage = FileStorage(file, StringSerializer())
+            storage = FileStorage(file, StringSerializer)
         }
         assertEquals(bismarck.value, null)
 
@@ -31,7 +31,7 @@ class FileStorageTests {
         assertEquals(File(file).readString(), "foob")
 
         bismarck = Bismarck.create {
-            storage = FileStorage(file, StringSerializer())
+            storage = FileStorage(file, StringSerializer)
         }
         assertEquals(bismarck.value, "foob")
 

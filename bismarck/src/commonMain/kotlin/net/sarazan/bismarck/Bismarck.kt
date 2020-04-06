@@ -7,10 +7,14 @@ import net.sarazan.bismarck.ratelimit.Freshness
 import net.sarazan.bismarck.storage.MemoryStorage
 import net.sarazan.bismarck.storage.Storage
 
+@DslMarker
+annotation class BismarckConfigMarker
+
 typealias Fetcher<T> = suspend () -> T?
 
 interface Bismarck<T : Any> : Closeable {
 
+    @BismarckConfigMarker
     data class Config<T : Any>(
         var fetcher: Fetcher<T>? = null,
         var freshness: Freshness? = null,

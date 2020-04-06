@@ -4,6 +4,7 @@ import kotlin.test.*
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.Bismarck.State.Fresh
 import net.sarazan.bismarck.Bismarck.State.Stale
+import net.sarazan.bismarck.extensions.freshness
 import net.sarazan.bismarck.platform.File
 import net.sarazan.bismarck.ratelimit.PersistentFreshness
 import net.sarazan.bismarck.serialization.StringSerializer
@@ -25,7 +26,7 @@ class PersistentFreshnessTests {
     @Test
     fun testPersistentFreshness() {
         var bismarck = Bismarck.create<String> {
-            storage = FileStorage("./storage.txt", StringSerializer())
+            storage = FileStorage("./storage.txt", StringSerializer)
             freshness = PersistentFreshness("./foo.txt", 1000)
         }
         assertEquals(bismarck.state, Stale)
@@ -34,7 +35,7 @@ class PersistentFreshnessTests {
         assertEquals(bismarck.state, Fresh)
 
         bismarck = Bismarck.create {
-            storage = FileStorage("./storage.txt", StringSerializer())
+            storage = FileStorage("./storage.txt", StringSerializer)
             freshness = PersistentFreshness("./foo.txt", 1000)
         }
         assertEquals(bismarck.value, "foo")
