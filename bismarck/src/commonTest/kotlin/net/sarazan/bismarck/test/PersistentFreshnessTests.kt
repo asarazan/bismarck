@@ -1,10 +1,12 @@
 package net.sarazan.bismarck.test
 
-import kotlin.test.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.Bismarck.State.Fresh
 import net.sarazan.bismarck.Bismarck.State.Stale
-import net.sarazan.bismarck.extensions.freshness
 import net.sarazan.bismarck.platform.File
 import net.sarazan.bismarck.ratelimit.PersistentFreshness
 import net.sarazan.bismarck.serialization.StringSerializer
