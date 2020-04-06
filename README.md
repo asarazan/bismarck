@@ -15,7 +15,7 @@ val bismarck = Bismarck.create<String> {
 }
 
 // Bismarck is coroutine-driven, 
-so async and observations should be scoped.
+// so async and observations should be scoped.
 someScope.launch { 
   bismarck.eachValue {
     println("Received value $it")    
