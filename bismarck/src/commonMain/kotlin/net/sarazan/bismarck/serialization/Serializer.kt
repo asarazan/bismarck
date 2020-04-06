@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sarazan.bismarck.storage
+package net.sarazan.bismarck.serialization
 
 interface Serializer<T : Any> {
     fun deserialize(bytes: ByteArray): T?

@@ -1,4 +1,4 @@
-include 'bismarck'
-include 'app'
+include(':bismarck')
+include(':app')
 
 enableFeaturePreview('GRADLE_METADATA')

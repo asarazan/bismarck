@@ -36,7 +36,7 @@ interface Bismarck<T : Any> : Closeable {
     fun check()
     fun insert(value: T?)
     fun invalidate()
-    fun reset()
+    fun clear()
 
     fun rescope(scope: CoroutineScope) = RescopedBismarck(this, scope)
 

@@ -1,37 +1,42 @@
 package net.sarazan.bismarck.platform
 
-import net.sarazan.bismarck.platform.files.FileLike
 import platform.Foundation.*
 
 private val mgr = NSFileManager.defaultManager
 
-class CocoaFile(private val url: NSURL) : FileLike {
+internal actual class File(private val url: NSURL) {
 
-    constructor(root: String, child: String? = null) : this(NSURL(string = child ?: root, relativeToURL = child?.let { NSURL(string = root) }))
+    actual constructor(path: String) : this(NSURL.fileURLWithPath(path))
 
-    override val parentFile: FileLike?
-        get() = url.URLByDeletingLastPathComponent?.let(::CocoaFile)
+    actual constructor(parent: String, child: String) :
+            this(NSURL.fileURLWithPath(child, NSURL.fileURLWithPath(parent)))
 
-    override val exists: Boolean
+    actual constructor(parent: File, child: String) :
+            this(NSURL.fileURLWithPath(child, parent.url))
+
+    actual val parentFile: File?
+        get() = url.URLByDeletingLastPathComponent?.let(::File)
+
+    actual val exists: Boolean
         get() = mgr.fileExistsAtPath(this.url.path!!)
 
-    override fun delete(): Boolean {
+    actual fun delete(): Boolean {
         return mgr.removeItemAtURL(url, null)
     }
 
-    override fun mkdirs(): Boolean {
+    actual fun mkdirs(): Boolean {
         return mgr.createDirectoryAtURL(url, true, null, null)
     }
 
-    override fun createNewFile(): Boolean {
+    actual fun createNewFile(): Boolean {
         return mgr.createFileAtPath(url.path!!, null, null)
     }
 
-    override fun readBytes(): ByteArray {
+    actual fun readBytes(): ByteArray {
         return NSData.dataWithContentsOfURL(url)!!.toByteArray()
     }
 
-    override fun writeBytes(bytes: ByteArray) {
+    actual fun writeBytes(bytes: ByteArray) {
         bytes.toNSData().writeToURL(url, true)
     }
 }

@@ -16,16 +16,19 @@
 
 buildscript {
     repositories {
+        mavenLocal()
         jcenter()
         google()
         gradlePluginPortal()
+        maven { url 'https://dl.bintray.com/jetbrains/kotlin-native-dependencies' }
+
     }
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
         classpath "org.jlleitschuh.gradle:ktlint-gradle:$KTLINT_VERSION"
-        classpath 'com.android.tools.build:gradle:3.6.0'
+        classpath 'com.android.tools.build:gradle:3.6.2'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4-jetbrains-3'
     }
 }
 

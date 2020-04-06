@@ -86,7 +86,7 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         check()
     }
 
-    override fun reset() {
+    override fun clear() {
         insert(null, currentTimeNano(), true)
     }
 

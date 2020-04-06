@@ -1,6 +1,7 @@
 package net.sarazan.bismarck.storage
 
-import net.sarazan.bismarck.platform.getFile
+import net.sarazan.bismarck.platform.File
+import net.sarazan.bismarck.serialization.Serializer
 
 class FileStorage<T : Any>(
     val path: String,
@@ -10,7 +11,7 @@ class FileStorage<T : Any>(
     override fun get(): T? {
         val cached = super.get()
         if (cached != null) return cached
-        val file = getFile(path)
+        val file = File(path)
         if (!file.exists) return null
         val loaded = serializer.deserialize(file.readBytes())
         super.put(loaded)
@@ -19,7 +20,7 @@ class FileStorage<T : Any>(
 
     override fun put(data: T?) {
         super.put(data)
-        val file = getFile(path)
+        val file = File(path)
         if (data == null) {
             file.delete()
         } else {
