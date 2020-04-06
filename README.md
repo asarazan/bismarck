@@ -4,18 +4,17 @@ A new caching/syncing library for Kotlin Multiplatform
 Under heavy construction. Better examples and instructions coming soon.
 
 ```kotlin
-val cache = Bismarck.create<Foo> {
+val cache = Bismarck.create<UserRecords> {
     fileStorage { 
         path = "foo.json"
-        serializer = JsonSerializer(Foo.serializer()) // requires bismarck-serializer-kotlinx
+        serializer = JsonSerializer(UserRecords.serializer()) // requires bismarck-serializer-kotlinx
     }
     freshness { 
         path = "foo-fresh" // freshness state will survive shutdowns if you specify a path
         millis = 15 * 60 * 1000 // data is considered fresh for 15 minutes
     }
     fetcher {
-        delay(1000) // imagine this is an expensive network fetch
-        Foo(bar = 123)
+        myApi.fetchAndProcessHundredsOfRecords()
     }
 }
 
