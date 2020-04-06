@@ -6,11 +6,11 @@ Under heavy construction. Better examples and instructions coming soon.
 ```kotlin
 val cache = Bismarck.create<Foo> {
     fileStorage { 
-        path = "foo.txt"
+        path = "foo.json"
         serializer = JsonSerializer(Foo.serializer()) // requires bismarck-serializer-kotlinx
     }
     freshness { 
-        path = "foo-fresh.txt"
+        path = "foo-fresh"
         millis = 15 * 60 * 1000 // data is considered fresh for 15 minutes
     }
     fetcher {
