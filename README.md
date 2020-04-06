@@ -26,6 +26,9 @@ someScope.launch {
     println("Received value ${it.bar}")    
   }
 }
+
+// You can also grab the value directly
+val current = cache.value
 ```
 
 ### Installation
