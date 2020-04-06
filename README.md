@@ -39,7 +39,7 @@ someScope.launch {
     }
 }
 
-// You can also grab the value directly
+// You can also grab all of these values directly
 val current = cache.value
 ```
 
