@@ -22,3 +22,12 @@ someScope.launch {
   }
 }
 ```
+
+### Installation
+```gradle
+commonMain {
+    dependencies {
+        implementation "net.sarazan:bismarck:$bismarck_version" // currently 0.0.5
+    }
+}
+```
