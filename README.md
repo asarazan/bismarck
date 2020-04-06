@@ -19,10 +19,7 @@ val cache = Bismarck.create<UserRecords> {
 }
 
 // Kick off a fetch with either check() or invalidate()
-fun myAppInit() {
-    //...
-    cache.check()
-}
+cache.check()
 
 // Bismarck is coroutine-driven, 
 // so async and observations should be scoped.
