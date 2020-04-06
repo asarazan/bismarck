@@ -18,32 +18,25 @@ package net.sarazan.bismarck.ratelimit
 
 import net.sarazan.bismarck.platform.currentTimeNano
 
-class SimpleFreshness(val ms: Long) : Freshness {
+open class SimpleFreshness(val ms: Long) : Freshness {
 
-    /**
-     * Uses [System.nanoTime]
-     */
     var lastRunNanos: Long = 0
-        private set
+        protected set
 
-    /**
-     * Uses [System.nanoTime]
-     */
-    override var resetNanos: Long = 0
-        private set
+    final override var resetNanos: Long = 0
+        protected set
 
-    /**
-     *
-     */
     override fun update(requestNanos: Long) {
         if (requestNanos >= resetNanos) {
             lastRunNanos = getCurrent()
+            save()
         }
     }
 
     override fun reset() {
         lastRunNanos = 0
         resetNanos = getCurrent()
+        save()
     }
 
     override fun isFresh(): Boolean {
@@ -59,4 +52,6 @@ class SimpleFreshness(val ms: Long) : Freshness {
         val ns = ms * 1_000_000
         return last == 0L || current - last >= ns
     }
+
+    protected open fun save() {}
 }
