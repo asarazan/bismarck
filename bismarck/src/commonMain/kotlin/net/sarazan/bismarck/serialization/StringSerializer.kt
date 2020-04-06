@@ -1,6 +1,6 @@
 package net.sarazan.bismarck.serialization
 
-class StringSerializer : Serializer<String> {
+object StringSerializer : Serializer<String> {
 
     @OptIn(ExperimentalStdlibApi::class)
     override fun deserialize(bytes: ByteArray): String? {

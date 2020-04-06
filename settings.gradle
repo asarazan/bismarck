@@ -1,3 +1,5 @@
+rootProject.name = "bismarck-parent"
+
 include(':bismarck')
 include(':bismarck-serializer-kotlinx')
 include(':app')
