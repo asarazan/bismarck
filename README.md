@@ -22,13 +22,27 @@ val cache = Bismarck.create<Foo> {
 // Bismarck is coroutine-driven, 
 // so async and observations should be scoped.
 someScope.launch { 
+
+  // This will be called whenever the data is updated, as long as the scope continues.
   cache.eachValue {
     println("Received value ${it.bar}")    
+  }
+  
+  // It's helpful to know what your cache is doing. Observe state to find out!
+  cache.eachState {
+    spinner.isVisible = it == Bismarck.State.Fetching
+  }
+  
+  // Same for error states!
+  cache.eachError {
+    warningIcon.isVisible = it != null
   }
 }
 
 // You can also grab the value directly
 val current = cache.value
+
+
 ```
 
 ### Installation
