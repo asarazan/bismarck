@@ -10,7 +10,7 @@ val cache = Bismarck.create<Foo> {
         serializer = JsonSerializer(Foo.serializer()) // requires bismarck-serializer-kotlinx
     }
     freshness { 
-        path = "foo-fresh"
+        path = "foo-fresh" // freshness state will survive shutdowns if you specify a path
         millis = 15 * 60 * 1000 // data is considered fresh for 15 minutes
     }
     fetcher {
