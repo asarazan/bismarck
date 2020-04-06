@@ -30,9 +30,15 @@ someScope.launch {
 
 ### Installation
 ```gradle
-commonMain {
-    dependencies {
-        implementation "net.sarazan:bismarck:$bismarck_version" // currently 0.0.6
+repositories {
+    maven { url  "https://dl.bintray.com/asarazan/maven" }
+}
+//...
+sourceSets {
+    commonMain {
+        dependencies {
+            implementation "net.sarazan:bismarck:$bismarck_version" // currently 0.0.6
+        }
     }
 }
 ```
