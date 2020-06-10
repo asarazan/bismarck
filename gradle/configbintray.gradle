@@ -34,7 +34,7 @@ bintray {
     override = true
     pkg {
         repo = BINTRAY_REPO
-        name = POM_ARTIFACT_ID
+        name = POM_NAME
         userOrg = POM_DEVELOPER_ORG
         licenses = ['Apache-2.0']
         vcsUrl = POM_SCM_URL
