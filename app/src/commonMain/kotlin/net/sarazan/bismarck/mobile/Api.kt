@@ -15,7 +15,8 @@ import io.ktor.http.contentType
 import io.ktor.http.takeFrom
 import kotlinx.serialization.json.Json
 
-object Api {
+class Api {
+    @OptIn(kotlinx.serialization.UnstableDefault::class)
     private val client = HttpClient {
         install(JsonFeature) {
             serializer = KotlinxSerializer(Json.nonstrict)

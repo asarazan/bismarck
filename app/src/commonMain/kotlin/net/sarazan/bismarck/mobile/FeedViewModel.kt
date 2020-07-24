@@ -8,19 +8,20 @@ import net.sarazan.bismarck.extensions.fileStorage
 import net.sarazan.bismarck.platform.BismarckDispatchers
 import net.sarazan.bismarck.ratelimit.SimpleFreshness
 import net.sarazan.bismarck.serializers.kotlinx.JsonSerializer
+import kotlin.native.concurrent.ThreadLocal
 
-class FeedViewModel(private val scope: CoroutineScope, private val filePath: String) {
-    constructor(filePath: String) : this(scope = CoroutineScope(BismarckDispatchers.main), filePath = filePath)
+class FeedViewModel(private val scope: CoroutineScope, private val filePath: String, private val onEach: ((Feed) -> Unit)? = null)  {
+    constructor(filePath: String, onEach: ((Feed) -> Unit)?) : this(scope = CoroutineScope(BismarckDispatchers.main), filePath = filePath, onEach = onEach)
 
-    var onEach: ((Feed) -> Unit)? = null
-
+    private val api = Api()
+    @ThreadLocal
     val cache = Bismarck.create<Feed> {
         fetcher = {
             print("@@@ getFeed")
-            Api.getFeed()
+            api.getFeed()
         }
         fileStorage {
-            path = "$filePath/feed.json"
+            path = "${filePath}/feed.json"
             serializer = JsonSerializer(Feed.serializer())
         }
         checkOnLaunch = true
@@ -28,13 +29,15 @@ class FeedViewModel(private val scope: CoroutineScope, private val filePath: Str
     }
 
     init {
-        scope.launch {
-            cache.eachValue {
-                println("@@@ kmp feed eachVal - $it")
-                it ?: return@eachValue
-                onEach?.invoke(it)
+        this.onEach?.let { onEach ->
+            scope.launch {
+                cache.eachValue {
+                    it ?: return@eachValue
+                    onEach(it)
+                }
             }
         }
+
     }
     fun forceRefresh() {
         cache.invalidate()
@@ -42,6 +45,11 @@ class FeedViewModel(private val scope: CoroutineScope, private val filePath: Str
 
     fun refreshIfStale() {
         cache.check()
+//        scope.launch {
+//            val response = api.getFeed()
+//            println("@@@ feed - ${response}")
+//            cache.insert(response)
+//        }
     }
 
     fun tearDown() {
