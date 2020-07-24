@@ -1,9 +1,9 @@
 package net.sarazan.bismarck.mobile
 
 import co.touchlab.stately.concurrency.GuardedStableRef
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.*
 import platform.Foundation.NSThread
-import kotlin.coroutines.CoroutineContext
 
 internal actual suspend fun <R> network(block: suspend () -> R): R = coroutineScope {
     withContext(childContext()) {

@@ -7,13 +7,12 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
 import net.sarazan.bismarck.mobile.FeedViewModel
-import net.sarazan.bismarck.mobile.FooViewModel
 import sample.R
 
 class MainActivity : AppCompatActivity() {
 
     private val feedViewModel: FeedViewModel by lazy {
-        FeedViewModel(lifecycleScope)
+        FeedViewModel(scope = lifecycleScope, filePath = "${applicationContext.cacheDir}")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +25,5 @@ class MainActivity : AppCompatActivity() {
                 main_text.text = it.items.firstOrNull()?.title
             }
         }
-
     }
 }

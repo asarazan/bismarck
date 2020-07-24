@@ -6,11 +6,9 @@ package net.sarazan.bismarck.mobile
 // val feed = json.parse(Feed.serializer(), jsonString)
 
 import kotlinx.serialization.*
-import kotlinx.serialization.json.*
-import kotlinx.serialization.internal.*
 
 @Serializable
-data class Feed (
+data class Feed(
     val version: String,
     val title: String,
 
@@ -32,14 +30,14 @@ data class Feed (
 )
 
 @Serializable
-data class Author (
+data class Author(
     val name: String,
     val url: String,
     val avatar: String
 )
 
 @Serializable
-data class Item (
+data class Item(
     val id: String,
     val title: String,
 
@@ -59,7 +57,7 @@ data class Item (
 )
 
 @Serializable
-data class Attachment (
+data class Attachment(
     val url: String,
 
     @SerialName("mime_type")
@@ -82,7 +80,7 @@ enum class MIMEType(val value: String) {
         }
         override fun deserialize(decoder: Decoder): MIMEType = when (val value = decoder.decodeString()) {
             "audio/mpeg" -> AudioMPEG
-            else         -> throw IllegalArgumentException("MIMEType could not parse: $value")
+            else -> throw IllegalArgumentException("MIMEType could not parse: $value")
         }
         override fun serialize(encoder: Encoder, value: MIMEType) {
             return encoder.encodeString(value.value)
@@ -91,7 +89,7 @@ enum class MIMEType(val value: String) {
 }
 
 @Serializable
-data class SizeInBytes (
+data class SizeInBytes(
     @SerialName("0")
     val the0: String
 )

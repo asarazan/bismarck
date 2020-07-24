@@ -60,6 +60,7 @@ kotlin {
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation project(':bismarck')
+                implementation project(':bismarck-serializer-kotlinx')
                 implementation "io.ktor:ktor-client-core:$ktor_version"
                 implementation "io.ktor:ktor-client-json:$ktor_version"
                 implementation "io.ktor:ktor-client-serialization:$ktor_version"

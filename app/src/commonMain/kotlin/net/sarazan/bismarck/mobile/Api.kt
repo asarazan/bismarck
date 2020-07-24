@@ -26,8 +26,7 @@ object Api {
         }
     }
 
-    suspend fun getFeed(): Feed
-            = get("381444908/feed.json")
+    suspend fun getFeed(): Feed = get("381444908/feed.json")
 
     private suspend inline fun <reified Response : Any> get(path: String): Response {
         return network {
