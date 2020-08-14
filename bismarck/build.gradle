@@ -93,5 +93,4 @@ configurations {
     compileClasspath
 }
 
-apply from: "${rootDir}/gradle/gradle-mvn-mpp-push.gradle"
-//apply from: "${rootDir}/gradle/npm-publish.gradle"
+apply from: "../gradle/gradle-mvn-mpp-push.gradle"

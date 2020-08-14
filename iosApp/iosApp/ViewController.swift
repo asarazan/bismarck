@@ -3,15 +3,13 @@ import app
 
 class ViewController: UIViewController {
     @IBOutlet weak var label: UILabel!
-    
-    let vm = FooViewModel()
-        
+
     override func viewWillAppear(_ animated: Bool) {
-        let bismarck = vm.foo
-        bismarck.onValue {
-            it in
-            self.label.text = "Hello and \(it ?? "null")"
-        }
+        let documentsDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.absoluteString
+        let feedVM = FeedViewModel(filePath: documentsDirectoryUrl, onEach: { feed in
+            self.label.text = feed.items.first?.title
+        })
+        feedVM.refreshIfStale()
     }
 
     override func didReceiveMemoryWarning() {
