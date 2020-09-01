@@ -47,7 +47,7 @@ kotlin {
     android("android")
     // This is for iPhone emulator
     // Switch here to iosArm64 (or iosArm32) to build library for iPhone device
-    iosX64("ios") {
+    ios() {
         binaries {
             framework {
                 freeCompilerArgs += "-Xobjc-generics"
@@ -101,7 +101,10 @@ kotlin {
 // make sure all Gradle infrastructure exists (gradle.wrapper, gradlew).
 task copyFramework {
     def buildType = project.findProperty('kotlin.build.type') ?: 'DEBUG'
-    def target = project.findProperty('kotlin.target') ?: 'ios'
+    def sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
+//    def target = project.findProperty('kotlin.target') ?: 'ios'
+    def target = "ios" + (sdkName.startsWith("iphoneos") ? "Arm64" : "X64")
+    println("Target: ${kotlin.targets}")
     dependsOn kotlin.targets."$target".binaries.getFramework(buildType).linkTask
 
     doLast {

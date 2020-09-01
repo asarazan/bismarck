@@ -23,26 +23,7 @@ def ideaActive = System.getProperty('idea.active') == 'true'
 
 kotlin {
     jvm()
-    if (ideaActive) {
-        println("Configuring single iosx64 target")
-        iosX64("ios") {
-            binaries {
-                framework {
-                    freeCompilerArgs += "-Xobjc-generics"
-                }
-            }
-        }
-    } else {
-        println("Configuring unified ios target")
-        ios() {
-            binaries {
-                framework {
-                    freeCompilerArgs += "-Xobjc-generics"
-                }
-            }
-        }
-    }
-
+    ios()
     sourceSets {
         commonMain {
             dependencies {
@@ -51,6 +32,7 @@ kotlin {
                 implementation "co.touchlab:stately-concurrency:1.1.0"
                 implementation "co.touchlab:stately-isolate:1.1.0-a1"
                 implementation "co.touchlab:stately-iso-collections:1.1.0-a1"
+                implementation "org.jetbrains.kotlinx:kotlinx-datetime:0.1.0"
                 api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$COROUTINES_VERSION"
             }
         }
@@ -59,7 +41,7 @@ kotlin {
             dependencies {
                 implementation kotlin("test-common")
                 implementation kotlin("test-annotations-common")
-                api "org.jetbrains.kotlinx:kotlinx-coroutines-test:$COROUTINES_VERSION"
+//                api "org.jetbrains.kotlinx:kotlinx-coroutines-test:$COROUTINES_VERSION"
             }
         }
 

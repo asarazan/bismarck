@@ -24,26 +24,7 @@ def ideaActive = System.getProperty('idea.active') == 'true'
 
 kotlin {
     jvm()
-    if (ideaActive) {
-        println("Configuring single iosx64 target")
-        iosX64("ios") {
-            binaries {
-                framework {
-                    freeCompilerArgs += "-Xobjc-generics"
-                }
-            }
-        }
-    } else {
-        println("Configuring unified ios target")
-        ios() {
-            binaries {
-                framework {
-                    freeCompilerArgs += "-Xobjc-generics"
-                }
-            }
-        }
-    }
-
+    ios()
     sourceSets {
         commonMain {
             dependencies {

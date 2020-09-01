@@ -14,7 +14,6 @@ class FeedViewModel(private val scope: CoroutineScope, private val filePath: Str
     constructor(filePath: String, onEach: ((Feed) -> Unit)?) : this(scope = CoroutineScope(BismarckDispatchers.main), filePath = filePath, onEach = onEach)
 
     private val api = Api()
-    @ThreadLocal
     val cache = Bismarck.create<Feed> {
         fetcher = {
             print("@@@ getFeed")
