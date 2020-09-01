@@ -14,12 +14,12 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.nonstrict
 
 class Api {
-    @OptIn(kotlinx.serialization.UnstableDefault::class)
     private val client = HttpClient {
         install(JsonFeature) {
-            serializer = KotlinxSerializer(Json.nonstrict)
+            serializer = KotlinxSerializer(Json { isLenient = true })
         }
         install(Logging) {
             logger = Logger.SIMPLE

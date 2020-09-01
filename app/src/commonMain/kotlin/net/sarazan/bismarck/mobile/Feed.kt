@@ -6,6 +6,8 @@ package net.sarazan.bismarck.mobile
 // val feed = json.parse(Feed.serializer(), jsonString)
 
 import kotlinx.serialization.*
+import kotlinx.serialization.descriptors.*
+import kotlinx.serialization.encoding.*
 
 @Serializable
 data class Feed(
@@ -75,8 +77,9 @@ enum class MIMEType(val value: String) {
     AudioMPEG("audio/mpeg");
 
     companion object : KSerializer<MIMEType> {
-        override val descriptor: SerialDescriptor get() {
-            return PrimitiveDescriptor("quicktype.MIMEType", PrimitiveKind.STRING)
+        override val descriptor: SerialDescriptor
+            get() {
+            return PrimitiveSerialDescriptor("quicktype.MIMEType", PrimitiveKind.STRING)
         }
         override fun deserialize(decoder: Decoder): MIMEType = when (val value = decoder.decodeString()) {
             "audio/mpeg" -> AudioMPEG

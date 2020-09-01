@@ -49,7 +49,7 @@ kotlin {
             dependencies {
                 implementation kotlin("stdlib-common")
                 api project(":bismarck")
-                api "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$SERIALIZATION_VERSION"
+                api "org.jetbrains.kotlinx:kotlinx-serialization-core:$SERIALIZATION_VERSION"
             }
         }
 
@@ -64,7 +64,6 @@ kotlin {
             dependsOn commonMain
             dependencies {
                 implementation kotlin("stdlib-jdk8")
-                api "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$SERIALIZATION_VERSION"
             }
         }
         jvmTest {
@@ -77,9 +76,7 @@ kotlin {
 
         iosMain {
             dependsOn commonMain
-            dependencies {
-                api "org.jetbrains.kotlinx:kotlinx-serialization-runtime-native:$SERIALIZATION_VERSION"
-            }
+            dependencies {}
         }
 
         iosTest {}
