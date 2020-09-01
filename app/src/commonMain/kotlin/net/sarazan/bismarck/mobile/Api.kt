@@ -14,7 +14,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.nonstrict
 
 class Api {
     private val client = HttpClient {

@@ -1,7 +1,6 @@
 package net.sarazan.bismarck.platform
 
 import java.io.Closeable
-import kotlin.jvm.Throws
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
