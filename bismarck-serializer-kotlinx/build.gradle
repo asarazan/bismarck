@@ -24,32 +24,13 @@ def ideaActive = System.getProperty('idea.active') == 'true'
 
 kotlin {
     jvm()
-    if (ideaActive) {
-        println("Configuring single iosx64 target")
-        iosX64("ios") {
-            binaries {
-                framework {
-                    freeCompilerArgs += "-Xobjc-generics"
-                }
-            }
-        }
-    } else {
-        println("Configuring unified ios target")
-        ios() {
-            binaries {
-                framework {
-                    freeCompilerArgs += "-Xobjc-generics"
-                }
-            }
-        }
-    }
-
+    ios()
     sourceSets {
         commonMain {
             dependencies {
                 implementation kotlin("stdlib-common")
                 api project(":bismarck")
-                api "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$SERIALIZATION_VERSION"
+                api "org.jetbrains.kotlinx:kotlinx-serialization-core:$SERIALIZATION_VERSION"
             }
         }
 
@@ -64,7 +45,6 @@ kotlin {
             dependsOn commonMain
             dependencies {
                 implementation kotlin("stdlib-jdk8")
-                api "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$SERIALIZATION_VERSION"
             }
         }
         jvmTest {
@@ -77,9 +57,7 @@ kotlin {
 
         iosMain {
             dependsOn commonMain
-            dependencies {
-                api "org.jetbrains.kotlinx:kotlinx-serialization-runtime-native:$SERIALIZATION_VERSION"
-            }
+            dependencies {}
         }
 
         iosTest {}

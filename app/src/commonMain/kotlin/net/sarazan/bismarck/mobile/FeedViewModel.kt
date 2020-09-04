@@ -8,20 +8,18 @@ import net.sarazan.bismarck.extensions.fileStorage
 import net.sarazan.bismarck.platform.BismarckDispatchers
 import net.sarazan.bismarck.ratelimit.SimpleFreshness
 import net.sarazan.bismarck.serializers.kotlinx.JsonSerializer
-import kotlin.native.concurrent.ThreadLocal
 
-class FeedViewModel(private val scope: CoroutineScope, private val filePath: String, private val onEach: ((Feed) -> Unit)? = null)  {
+class FeedViewModel(private val scope: CoroutineScope, private val filePath: String, private val onEach: ((Feed) -> Unit)? = null) {
     constructor(filePath: String, onEach: ((Feed) -> Unit)?) : this(scope = CoroutineScope(BismarckDispatchers.main), filePath = filePath, onEach = onEach)
 
     private val api = Api()
-    @ThreadLocal
     val cache = Bismarck.create<Feed> {
         fetcher = {
             print("@@@ getFeed")
             api.getFeed()
         }
         fileStorage {
-            path = "${filePath}/feed.json"
+            path = "$filePath/feed.json"
             serializer = JsonSerializer(Feed.serializer())
         }
         checkOnLaunch = true
@@ -37,7 +35,6 @@ class FeedViewModel(private val scope: CoroutineScope, private val filePath: Str
                 }
             }
         }
-
     }
     fun forceRefresh() {
         cache.invalidate()

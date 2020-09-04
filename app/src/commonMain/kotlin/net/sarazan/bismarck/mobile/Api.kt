@@ -14,17 +14,21 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
 import kotlinx.serialization.json.Json
+import co.touchlab.stately.ensureNeverFrozen
 
 class Api {
-    @OptIn(kotlinx.serialization.UnstableDefault::class)
-    private val client = HttpClient {
+    private val client get() = HttpClient {
         install(JsonFeature) {
-            serializer = KotlinxSerializer(Json.nonstrict)
+            serializer = KotlinxSerializer(Json { isLenient = true })
         }
         install(Logging) {
             logger = Logger.SIMPLE
             level = LogLevel.ALL
         }
+    }
+
+    init {
+        ensureNeverFrozen()
     }
 
     suspend fun getFeed(): Feed = get("381444908/feed.json")
