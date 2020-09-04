@@ -79,8 +79,8 @@ enum class MIMEType(val value: String) {
     companion object : KSerializer<MIMEType> {
         override val descriptor: SerialDescriptor
             get() {
-            return PrimitiveSerialDescriptor("quicktype.MIMEType", PrimitiveKind.STRING)
-        }
+                return PrimitiveSerialDescriptor("quicktype.MIMEType", PrimitiveKind.STRING)
+            }
         override fun deserialize(decoder: Decoder): MIMEType = when (val value = decoder.decodeString()) {
             "audio/mpeg" -> AudioMPEG
             else -> throw IllegalArgumentException("MIMEType could not parse: $value")
