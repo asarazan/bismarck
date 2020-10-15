@@ -9,7 +9,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
-ext.ktor_version = "1.4.0"
+ext.ktor_version = "1.4.1"
 
 android {
     compileSdkVersion 29
@@ -57,7 +57,7 @@ kotlin {
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation project(':bismarck')
-                implementation project(':bismarck-serializer-kotlinx')
+                implementation project(':bismarck-kotlinx-json')
                 implementation "io.ktor:ktor-client-core:$ktor_version"
                 implementation "io.ktor:ktor-client-json:$ktor_version"
                 implementation "io.ktor:ktor-client-serialization:$ktor_version"

@@ -30,7 +30,7 @@ kotlin {
             dependencies {
                 implementation kotlin("stdlib-common")
                 api project(":bismarck")
-                api "org.jetbrains.kotlinx:kotlinx-serialization-core:$SERIALIZATION_VERSION"
+                api "org.jetbrains.kotlinx:kotlinx-serialization-json:$SERIALIZATION_VERSION"
             }
         }
 
