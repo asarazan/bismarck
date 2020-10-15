@@ -1,2 +1,7 @@
-include ':app', ':bismarck', ':bismarck-android'
-rootProject.name='bismarck-parent'
+rootProject.name = "bismarck-parent"
+
+include(':bismarck')
+include(':bismarck-serializer-kotlinx')
+include(':app')
+
+enableFeaturePreview('GRADLE_METADATA')
