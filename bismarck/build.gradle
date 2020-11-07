@@ -24,8 +24,9 @@ def ideaActive = System.getProperty('idea.active') == 'true'
 kotlin {
     jvm()
     ios()
-    js() {
+    js(IR) {
         nodejs()
+        binaries.executable()
     }
     sourceSets {
         commonMain {

@@ -1,10 +1,11 @@
 package net.sarazan.bismarck.platform
 
 internal actual class File {
-    val path: String
+    var path: String = ""
 
     actual constructor(path: String) {
         this.path = path
+
     }
 
     actual constructor(parent: String, child: String) {
