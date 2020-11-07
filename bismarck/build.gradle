@@ -24,14 +24,17 @@ def ideaActive = System.getProperty('idea.active') == 'true'
 kotlin {
     jvm()
     ios()
+    js() {
+        nodejs()
+    }
     sourceSets {
         commonMain {
             dependencies {
                 implementation kotlin("stdlib-common")
-                api "co.touchlab:stately-common:1.1.0"
-                api "co.touchlab:stately-concurrency:1.1.0"
-                api "co.touchlab:stately-isolate:1.1.0-a1"
-                api "co.touchlab:stately-iso-collections:1.1.0-a1"
+                api "co.touchlab:stately-common:1.1.1"
+                api "co.touchlab:stately-concurrency:1.1.1"
+                api "co.touchlab:stately-isolate:1.1.1-a1"
+                api "co.touchlab:stately-iso-collections:1.1.1-a1"
                 api "org.jetbrains.kotlinx:kotlinx-datetime:0.1.0"
                 api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$COROUTINES_VERSION"
             }
@@ -65,6 +68,19 @@ kotlin {
         }
 
         iosTest {}
+
+        jsMain {
+            dependsOn commonMain
+            dependencies {
+                implementation kotlin('stdlib-js')
+            }
+        }
+        jsTest {
+            dependsOn commonTest
+            dependencies {
+                implementation kotlin('test-js')
+            }
+        }
     }
 }
 
