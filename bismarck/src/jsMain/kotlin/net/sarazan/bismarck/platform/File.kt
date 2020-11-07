@@ -1,42 +1,57 @@
 package net.sarazan.bismarck.platform
 
-internal actual class File {
-    var path: String = ""
+import fs.MakeDirectoryOptions
+import org.w3c.dom.url.URL
 
-    actual constructor(path: String) {
-        this.path = path
+val mkdirRecursive = js("{ recursive: true }").unsafeCast<MakeDirectoryOptions>()
 
-    }
+internal actual class File(val url: URL) {
 
-    actual constructor(parent: String, child: String) {
-        TODO("Not yet implemented")
-    }
+    actual constructor(path: String) : this(URL(path))
 
-    actual constructor(parent: File, child: String) {
-        TODO("Not yet implemented")
-    }
+    actual constructor(parent: String, child: String) : this("${parent}/${child}")
+
+    actual constructor(parent: File, child: String) : this(parent.url.href, child)
 
     actual val parentFile: File?
-        get() = TODO("Not yet implemented")
+        get() = url.parent()?.let { File(it) }
+
     actual val exists: Boolean
-        get() = TODO("Not yet implemented")
+        get() = fs.existsSync(url)
 
     actual fun delete(): Boolean {
-        TODO("Not yet implemented")
+        return try {
+            fs.unlinkSync(url)
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     actual fun mkdirs(): Boolean {
-        TODO("Not yet implemented")
+        return try {
+            fs.mkdirSync(url, mkdirRecursive)
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     actual fun createNewFile(): Boolean {
-        TODO("Not yet implemented")
+        return try {
+            fs.openSync(path = url, flags = "w", mode = "readwrite")
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     actual fun readBytes(): ByteArray {
-        TODO("Not yet implemented")
+        val str = fs.readFileSync(url, "utf8")
+        return str.encodeToByteArray()
     }
 
     actual fun writeBytes(bytes: ByteArray) {
+        fs.writeFileSync(url, bytes.decodeToString(), "utf8")
     }
 }
