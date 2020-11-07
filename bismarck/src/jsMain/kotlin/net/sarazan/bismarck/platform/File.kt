@@ -3,11 +3,20 @@ package net.sarazan.bismarck.platform
 import fs.MakeDirectoryOptions
 import org.w3c.dom.url.URL
 
+val fsHack = js("require(\"fs\")")
 val mkdirRecursive = js("{ recursive: true }").unsafeCast<MakeDirectoryOptions>()
+fun sanitizeUrlPath(url: String): String {
+    return when {
+        url.startsWith("http:") ||
+        url.startsWith("https:") -> throw RuntimeException("Cannot handle remote URLs for now")
+        url.startsWith("file:") -> url
+        else -> "file://${js("__dirname")}/$url"
+    }
+}
 
 internal actual class File(val url: URL) {
 
-    actual constructor(path: String) : this(URL(path))
+    actual constructor(path: String) : this(URL(sanitizeUrlPath(path)))
 
     actual constructor(parent: String, child: String) : this("${parent}/${child}")
 
@@ -20,6 +29,7 @@ internal actual class File(val url: URL) {
         get() = fs.existsSync(url)
 
     actual fun delete(): Boolean {
+        if (!exists) return true
         return try {
             fs.unlinkSync(url)
             true
@@ -39,9 +49,9 @@ internal actual class File(val url: URL) {
 
     actual fun createNewFile(): Boolean {
         return try {
-            fs.openSync(path = url, flags = "w", mode = "readwrite")
+            fsHack.openSync(url, "w")
             true
-        } catch (e: Exception) {
+        } catch (e: Error) {
             false
         }
     }
