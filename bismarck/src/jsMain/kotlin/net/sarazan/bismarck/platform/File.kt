@@ -18,7 +18,7 @@ internal actual class File(val url: URL) {
 
     actual constructor(path: String) : this(URL(sanitizeUrlPath(path)))
 
-    actual constructor(parent: String, child: String) : this("${parent}/${child}")
+    actual constructor(parent: String, child: String) : this("$parent/$child")
 
     actual constructor(parent: File, child: String) : this(parent.url.href, child)
 
