@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+apply plugin: "lt.petuska.npm.publish"
 apply plugin: "org.jetbrains.kotlin.multiplatform"
 
 group = GROUP
@@ -91,3 +92,14 @@ configurations {
 }
 
 apply from: "../gradle/gradle-mvn-mpp-push.gradle"
+
+npmPublishing {
+    organization = "volley"
+    dry = true
+    repositories {
+        repository {
+            registry = uri("https://registry.npmjs.org")
+            authToken = "${System.env.NPM_TOKEN}"
+        }
+    }
+}
