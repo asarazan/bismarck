@@ -54,7 +54,7 @@ repositories {
 sourceSets {
     commonMain {
         dependencies {
-            implementation "net.sarazan:bismarck:$bismarck_version" // currently 0.0.6
+            implementation "net.sarazan:bismarck:$bismarck_version" // currently 0.1.0
         }
     }
 }
