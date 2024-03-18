@@ -1,9 +1,11 @@
 package net.sarazan.bismarck.platform
 
+import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.*
 
 private val mgr = NSFileManager.defaultManager
 
+@OptIn(ExperimentalForeignApi::class)
 internal actual class File(private val url: NSURL) {
 
     actual constructor(path: String) : this(NSURL.fileURLWithPath(path))

@@ -1,18 +1,12 @@
 package net.sarazan.bismarck
 
 import co.touchlab.stately.concurrency.AtomicInt
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import net.sarazan.bismarck.Bismarck.State.Fresh
 import net.sarazan.bismarck.Bismarck.State.Stale
 import net.sarazan.bismarck.platform.currentTimeNano
 
-@ObsoleteCoroutinesApi
-@ExperimentalCoroutinesApi
 class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarck<T> {
 
     override var value: T?
@@ -20,7 +14,7 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         set(value) {
             storage.put(value)
             scope.launch {
-                valueChannel.send(storage.get())
+                valueChannel.emit(storage.get())
             }
         }
 
@@ -34,16 +28,16 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         private set(value) {
             field = value
             scope.launch {
-                errorChannel.send(field)
+                errorChannel.emit(field)
             }
         }
 
     private val _fetchCount = AtomicInt(0)
     private var fetchJob: Job? = null
 
-    private val valueChannel by lazy { ConflatedBroadcastChannel(value) }
-    private val stateChannel by lazy { ConflatedBroadcastChannel(state) }
-    private val errorChannel by lazy { ConflatedBroadcastChannel(error) }
+    private val valueChannel by lazy { MutableStateFlow(value) }
+    private val stateChannel by lazy { MutableStateFlow(state) }
+    private val errorChannel by lazy { MutableStateFlow(error) }
 
     private val fetcher get() = config.fetcher
     private val freshness get() = config.freshness
@@ -52,9 +46,9 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
 
     init {
         scope.launch {
-            valueChannel.send(value)
-            stateChannel.send(state)
-            errorChannel.send(error)
+            valueChannel.emit(value)
+            stateChannel.emit(state)
+            errorChannel.emit(error)
             if (config.checkOnLaunch) {
                 check()
             }
@@ -62,13 +56,13 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
     }
 
     override suspend fun eachValue(fn: (T?) -> Unit) {
-        valueChannel.consumeEach(fn)
+        valueChannel.collect(fn)
     }
     override suspend fun eachState(fn: (Bismarck.State?) -> Unit) {
-        stateChannel.consumeEach(fn)
+        stateChannel.collect(fn)
     }
     override suspend fun eachError(fn: (Exception?) -> Unit) {
-        errorChannel.consumeEach(fn)
+        errorChannel.collect(fn)
     }
 
     override fun check() {
@@ -91,9 +85,10 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
     }
 
     override fun close() {
-        valueChannel.close()
-        stateChannel.close()
-        errorChannel.close()
+        // nothing.
+//        valueChannel.close()
+//        stateChannel.close()
+//        errorChannel.close()
     }
 
     internal fun fetch() {
@@ -131,7 +126,7 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
 
     private fun updateState() {
         scope.launch {
-            stateChannel.send(state)
+            stateChannel.emit(state)
         }
     }
 }

@@ -1,7 +1,0 @@
-rootProject.name = "bismarck-parent"
-
-include(':bismarck')
-include(':bismarck-kotlinx-json')
-include(':app')
-
-enableFeaturePreview('GRADLE_METADATA')
