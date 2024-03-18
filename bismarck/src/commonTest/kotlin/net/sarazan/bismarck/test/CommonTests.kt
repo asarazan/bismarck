@@ -1,14 +1,22 @@
 package net.sarazan.bismarck.test
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlinx.coroutines.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.Bismarck.State
-import net.sarazan.bismarck.Bismarck.State.*
+import net.sarazan.bismarck.Bismarck.State.Fetching
+import net.sarazan.bismarck.Bismarck.State.Fresh
+import net.sarazan.bismarck.Bismarck.State.Stale
 import net.sarazan.bismarck.ratelimit.SimpleFreshness
 import net.sarazan.bismarck.storage.MemoryStorage
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
+@OptIn(DelicateCoroutinesApi::class)
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 class CommonTests {
