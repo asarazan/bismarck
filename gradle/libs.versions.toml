@@ -8,6 +8,10 @@ androidx-activityCompose = "1.8.0"
 mavenPublish = "0.25.3"
 stately = "2.0.0"
 kotlinx-serialization = "1.6.3"
+junit = "4.13.2"
+runner = "1.0.2"
+espressoCore = "3.0.2"
+appcompatV7 = "28.0.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -23,6 +27,10 @@ kotlinx-nodejs = { module = "org.jetbrains.kotlinx:kotlinx-nodejs", version = "0
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 stately-concurrency = { module = "co.touchlab:stately-concurrency", version.ref = "stately" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+runner = { group = "com.android.support.test", name = "runner", version.ref = "runner" }
+espresso-core = { group = "com.android.support.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+appcompat-v7 = { group = "com.android.support", name = "appcompat-v7", version.ref = "appcompatV7" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
