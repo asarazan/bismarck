@@ -81,13 +81,6 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         insert(null, currentTimeNano(), true)
     }
 
-    override fun close() {
-        // nothing.
-//        valueChannel.close()
-//        stateChannel.close()
-//        errorChannel.close()
-    }
-
     internal fun fetch() {
         val fetch = fetcher ?: return
         val time = currentTimeNano()

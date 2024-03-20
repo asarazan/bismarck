@@ -13,7 +13,7 @@ annotation class BismarckConfigMarker
 
 typealias Fetcher<T> = suspend () -> T?
 
-interface Bismarck<T : Any> : Closeable {
+interface Bismarck<T : Any> {
 
     @BismarckConfigMarker
     data class Config<T : Any>(
