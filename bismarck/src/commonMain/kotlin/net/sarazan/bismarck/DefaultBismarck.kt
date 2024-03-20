@@ -4,7 +4,6 @@ import co.touchlab.stately.concurrency.AtomicInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,19 +11,9 @@ import kotlinx.coroutines.launch
 import net.sarazan.bismarck.Bismarck.State
 import net.sarazan.bismarck.Bismarck.State.Stale
 import net.sarazan.bismarck.platform.currentTimeNano
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
 
 class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarck<T> {
-
-    override var value: T?
-        get() = storage.get()
-        set(value) {
-            storage.put(value)
-            scope.launch {
-                _values.emit(storage.get())
-            }
-        }
 
     private val _fetchCount = AtomicInt(0)
     private var fetchJob: Job? = null
@@ -38,7 +27,7 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
 
     override val values: StateFlow<T?>
         get() = _values
-    private val _values = MutableStateFlow(value)
+    private val _values = MutableStateFlow(storage.get())
 
     override val states: StateFlow<State?>
         get() = _states
@@ -100,7 +89,8 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
     }
 
     private suspend fun insert(value: T?, timestamp: Long, reset: Boolean) {
-        this.value = value
+        _values.emit(value)
+        storage.put(value)
         if (reset) {
             resetFreshness()
         } else {

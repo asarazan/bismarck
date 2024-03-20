@@ -25,9 +25,9 @@ class CommonTests {
     @Test
     fun testInsert() = runBlockingTest {
         val bismarck = Bismarck.create<String>()
-        assertEquals(null, bismarck.value)
+        assertEquals(null, bismarck.values.value)
         bismarck.insert("Foo")
-        assertEquals("Foo", bismarck.value)
+        assertEquals("Foo", bismarck.values.value)
     }
 
     @Test
@@ -58,12 +58,12 @@ class CommonTests {
         assertEquals(Stale, bismarck.states.value)
         bismarck.invalidate()
         assertEquals(Fetching, bismarck.states.value)
-        assertEquals(null, bismarck.value)
+        assertEquals(null, bismarck.values.value)
         delay(50)
         assertEquals(Fetching, bismarck.states.value)
-        assertEquals(null, bismarck.value)
+        assertEquals(null, bismarck.values.value)
         delay(100)
-        assertEquals("Foo", bismarck.value)
+        assertEquals("Foo", bismarck.values.value)
         assertEquals(Fresh, bismarck.states.value)
     }
 
@@ -78,7 +78,7 @@ class CommonTests {
 
             this.storage = persister
         }
-        assertEquals("Foo", bismarck.value)
+        assertEquals("Foo", bismarck.values.value)
     }
 
     @Test
@@ -185,7 +185,7 @@ class CommonTests {
 
         println("Should be fresh and in position 0. Invalidate again.")
         assertEquals(Fresh, bismarck.states.value)
-        assertEquals("Foob-0", bismarck.value)
+        assertEquals("Foob-0", bismarck.values.value)
         bismarck.invalidate()
 
         println("Should be fetching and in position 0 for at least 90ms.")
@@ -193,7 +193,7 @@ class CommonTests {
         println("delay 90")
         delay(90)
         assertEquals(Fetching, bismarck.states.value)
-        assertEquals("Foob-0", bismarck.value)
+        assertEquals("Foob-0", bismarck.values.value)
 
         println("Trigger a new invalidate. This should theoretically queue up a second fetch in about 10ms")
         bismarck.invalidate()
@@ -202,12 +202,12 @@ class CommonTests {
 
         println("We should be on the second fetch by now. Current position is 1")
         assertEquals(Fetching, bismarck.states.value)
-        assertEquals("Foob-1", bismarck.value)
+        assertEquals("Foob-1", bismarck.values.value)
         println("delay 100")
         delay(100)
 
         println("The final fetch came in. Fresh in position 2")
         assertEquals(Fresh, bismarck.states.value)
-        assertEquals("Foob-2", bismarck.value)
+        assertEquals("Foob-2", bismarck.values.value)
     }
 }

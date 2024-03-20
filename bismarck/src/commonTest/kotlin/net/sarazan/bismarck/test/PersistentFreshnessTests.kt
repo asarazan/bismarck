@@ -33,14 +33,14 @@ class PersistentFreshnessTests {
         }
         assertEquals(bismarck.states.value, Stale)
         bismarck.insert("foo")
-        assertEquals(bismarck.value, "foo")
+        assertEquals(bismarck.values.value, "foo")
         assertEquals(bismarck.states.value, Fresh)
 
         bismarck = Bismarck.create {
             storage = FileStorage("./storage.txt", StringSerializer)
             freshness = PersistentFreshness("./foo.txt", 1000)
         }
-        assertEquals(bismarck.value, "foo")
+        assertEquals(bismarck.values.value, "foo")
         assertEquals(bismarck.states.value, Fresh)
     }
 }

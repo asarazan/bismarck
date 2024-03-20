@@ -1,10 +1,9 @@
 package net.sarazan.bismarck
 
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import net.sarazan.bismarck.platform.BismarckDispatchers
 import net.sarazan.bismarck.freshness.Freshness
+import net.sarazan.bismarck.platform.BismarckDispatchers
 import net.sarazan.bismarck.storage.MemoryStorage
 import net.sarazan.bismarck.storage.Storage
 
@@ -30,9 +29,7 @@ interface Bismarck<T : Any> {
         Fetching
     }
 
-    val value: T?
     val values: StateFlow<T?>
-
     val states: StateFlow<State?>
     val errors: StateFlow<Throwable?>
 
