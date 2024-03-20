@@ -22,7 +22,9 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
     private val freshness get() = config.freshness
     private val storage get() = config.storage
     private val dispatcher get() = config.dispatcher
-    private val scope = CoroutineScope(dispatcher + SupervisorJob())
+
+    override val coroutineScope: CoroutineScope
+        get() = CoroutineScope(dispatcher + SupervisorJob())
 
     override val values: StateFlow<T?>
         get() = _values
@@ -37,7 +39,7 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
     private val _errors = MutableStateFlow<Throwable?>(null)
 
     init {
-        scope.launch {
+        coroutineScope.launch {
             if (config.checkOnLaunch) {
                 check()
             }
@@ -69,7 +71,7 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         _fetchCount.incrementAndGet()
         updateState()
         val job = fetchJob
-        fetchJob = scope.launch {
+        fetchJob = coroutineScope.launch {
             // join call acts as a single-pass gate for deduping requests
             job?.join()
             try {
@@ -107,7 +109,7 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         updateState()
         freshness?.remainingTime()?.let {
             freshnessJob?.cancel()
-            freshnessJob = scope.launch {
+            freshnessJob = coroutineScope.launch {
                 delay(it)
                 updateState()
             }

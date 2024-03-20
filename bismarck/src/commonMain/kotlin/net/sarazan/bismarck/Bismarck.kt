@@ -1,6 +1,7 @@
 package net.sarazan.bismarck
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import net.sarazan.bismarck.freshness.Freshness
 import net.sarazan.bismarck.platform.BismarckDispatchers
@@ -32,6 +33,8 @@ interface Bismarck<T : Any> {
     val values: StateFlow<T?>
     val states: StateFlow<State?>
     val errors: StateFlow<Throwable?>
+
+    val coroutineScope: CoroutineScope
 
     suspend fun insert(value: T?)
     suspend fun invalidate()
