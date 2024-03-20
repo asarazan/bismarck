@@ -44,9 +44,9 @@ open class SimpleFreshness(val duration: Duration) : Freshness {
         return !pass(getCurrent())
     }
 
-    override fun remainingTime(): Long? {
+    override fun remainingTime(): Duration? {
         val expires = lastRunNanos.nanoseconds + duration
-        return (expires - currentTimeNano().nanoseconds).inWholeNanoseconds
+        return (expires - currentTimeNano().nanoseconds)
     }
 
     private fun getCurrent(): Long {
