@@ -25,8 +25,7 @@ open class SimpleFreshness(val ms: Long) : Freshness {
     var lastRunNanos: Long = 0
         protected set
 
-    final override var resetNanos: Long = 0
-        protected set
+    protected var resetNanos: Long = 0
 
     override fun update(requestNanos: Long) {
         if (requestNanos >= resetNanos) {
