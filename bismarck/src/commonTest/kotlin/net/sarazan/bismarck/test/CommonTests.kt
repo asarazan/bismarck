@@ -5,13 +5,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.Bismarck.State
 import net.sarazan.bismarck.Bismarck.State.Fetching
 import net.sarazan.bismarck.Bismarck.State.Fresh
 import net.sarazan.bismarck.Bismarck.State.Stale
-import net.sarazan.bismarck.ratelimit.SimpleFreshness
+import net.sarazan.bismarck.freshness.SimpleFreshness
 import net.sarazan.bismarck.storage.MemoryStorage
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -24,9 +25,9 @@ class CommonTests {
     @Test
     fun testInsert() = runBlockingTest {
         val bismarck = Bismarck.create<String>()
-        assertEquals(null, bismarck.value)
+        assertEquals(null, bismarck.values.value)
         bismarck.insert("Foo")
-        assertEquals("Foo", bismarck.value)
+        assertEquals("Foo", bismarck.values.value)
     }
 
     @Test
@@ -34,15 +35,15 @@ class CommonTests {
         val bismarck = Bismarck.create<String> {
             freshness = SimpleFreshness(100)
         }
-        assertEquals(Stale, bismarck.state)
+        assertEquals(Stale, bismarck.states.value)
         bismarck.insert("Foo")
-        assertEquals(Fresh, bismarck.state)
+        assertEquals(Fresh, bismarck.states.value)
         bismarck.invalidate()
-        assertEquals(Stale, bismarck.state)
+        assertEquals(Stale, bismarck.states.value)
         bismarck.insert("Foo")
-        assertEquals(Fresh, bismarck.state)
+        assertEquals(Fresh, bismarck.states.value)
         delay(200)
-        assertEquals(Stale, bismarck.state)
+        assertEquals(Stale, bismarck.states.value)
     }
 
     @Test
@@ -54,16 +55,16 @@ class CommonTests {
                 "Foo"
             }
         }
-        assertEquals(Stale, bismarck.state)
+        assertEquals(Stale, bismarck.states.value)
         bismarck.invalidate()
-        assertEquals(Fetching, bismarck.state)
-        assertEquals(null, bismarck.value)
+        assertEquals(Fetching, bismarck.states.value)
+        assertEquals(null, bismarck.values.value)
         delay(50)
-        assertEquals(Fetching, bismarck.state)
-        assertEquals(null, bismarck.value)
+        assertEquals(Fetching, bismarck.states.value)
+        assertEquals(null, bismarck.values.value)
         delay(100)
-        assertEquals("Foo", bismarck.value)
-        assertEquals(Fresh, bismarck.state)
+        assertEquals("Foo", bismarck.values.value)
+        assertEquals(Fresh, bismarck.states.value)
     }
 
     @Test
@@ -77,7 +78,7 @@ class CommonTests {
 
             this.storage = persister
         }
-        assertEquals("Foo", bismarck.value)
+        assertEquals("Foo", bismarck.values.value)
     }
 
     @Test
@@ -85,7 +86,7 @@ class CommonTests {
         var received: String? = null
         val bismarck = Bismarck.create<String>()
         GlobalScope.launch {
-            bismarck.eachValue {
+            bismarck.values.collectLatest {
                 received = it
             }
         }
@@ -106,7 +107,7 @@ class CommonTests {
             }
         }
         GlobalScope.launch {
-            bismarck.eachState {
+            bismarck.states.collectLatest {
                 received = it
             }
         }
@@ -122,27 +123,32 @@ class CommonTests {
 
     @Test
     fun testError() = runBlockingTest {
-        val exception = RuntimeException("Foo")
-        var received: Exception? = null
+        var exception: Exception? = RuntimeException("Foo")
+        var received: Throwable? = null
         val bismarck = Bismarck.create<String> {
             fetcher = {
                 delay(100)
-                throw exception
+                exception?.let { throw it }
             }
         }
         GlobalScope.launch {
-            bismarck.eachError {
+            bismarck.errors.collect {
                 received = it
             }
         }
-        assertEquals(null, bismarck.error)
+        assertEquals(null, bismarck.errors.value)
         assertEquals(null, received)
         bismarck.invalidate()
-        assertEquals(null, bismarck.error)
+        assertEquals(null, bismarck.errors.value)
         assertEquals(null, received)
         delay(200)
-        assertEquals(exception, bismarck.error)
+        assertEquals(exception, bismarck.errors.value)
         assertEquals(exception, received)
+        exception = null
+        bismarck.check()
+        delay(200)
+        assertEquals(null, bismarck.errors.value)
+        assertEquals(null, received)
     }
 
     @Test
@@ -159,35 +165,35 @@ class CommonTests {
         }
 
         GlobalScope.launch {
-            bismarck.eachState {
+            bismarck.states.collectLatest {
                 println("Dedupe State: $it")
             }
 
-            bismarck.eachValue {
+            bismarck.values.collectLatest {
                 println("Dedupe Value: $it")
             }
         }
 
         println("Should be null and stale. Trigger an invalidate")
-        assertEquals(Stale, bismarck.state)
+        assertEquals(Stale, bismarck.states.value)
         bismarck.invalidate()
 
         println("Should be null and fetching because it takes 100ms.")
-        assertEquals(Fetching, bismarck.state)
+        assertEquals(Fetching, bismarck.states.value)
         println("delay 150")
         delay(150)
 
         println("Should be fresh and in position 0. Invalidate again.")
-        assertEquals(Fresh, bismarck.state)
-        assertEquals("Foob-0", bismarck.value)
+        assertEquals(Fresh, bismarck.states.value)
+        assertEquals("Foob-0", bismarck.values.value)
         bismarck.invalidate()
 
         println("Should be fetching and in position 0 for at least 90ms.")
-        assertEquals(Fetching, bismarck.state)
+        assertEquals(Fetching, bismarck.states.value)
         println("delay 90")
         delay(90)
-        assertEquals(Fetching, bismarck.state)
-        assertEquals("Foob-0", bismarck.value)
+        assertEquals(Fetching, bismarck.states.value)
+        assertEquals("Foob-0", bismarck.values.value)
 
         println("Trigger a new invalidate. This should theoretically queue up a second fetch in about 10ms")
         bismarck.invalidate()
@@ -195,13 +201,13 @@ class CommonTests {
         delay(50)
 
         println("We should be on the second fetch by now. Current position is 1")
-        assertEquals(Fetching, bismarck.state)
-        assertEquals("Foob-1", bismarck.value)
+        assertEquals(Fetching, bismarck.states.value)
+        assertEquals("Foob-1", bismarck.values.value)
         println("delay 100")
         delay(100)
 
         println("The final fetch came in. Fresh in position 2")
-        assertEquals(Fresh, bismarck.state)
-        assertEquals("Foob-2", bismarck.value)
+        assertEquals(Fresh, bismarck.states.value)
+        assertEquals("Foob-2", bismarck.values.value)
     }
 }

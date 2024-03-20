@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package net.sarazan.bismarck.ratelimit
+package net.sarazan.bismarck.freshness
+
+import net.sarazan.bismarck.platform.currentTimeNano
 
 interface Freshness {
     val resetNanos: Long
     fun update(requestNanos: Long)
     fun reset()
     fun isFresh(): Boolean
+
+    fun getRemainingNanos(): Long?
 }

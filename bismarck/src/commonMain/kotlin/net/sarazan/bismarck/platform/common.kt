@@ -4,11 +4,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
-expect interface Closeable {
-    @Throws(Exception::class)
-    fun close()
-}
-
 fun currentTimeMillis(): Long = Clock.System.now().toEpochMilliseconds()
 fun currentTimeNano(): Long = Clock.System.now().toEpochNanoseconds()
 

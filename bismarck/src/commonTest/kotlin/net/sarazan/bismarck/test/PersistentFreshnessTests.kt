@@ -8,7 +8,7 @@ import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.Bismarck.State.Fresh
 import net.sarazan.bismarck.Bismarck.State.Stale
 import net.sarazan.bismarck.platform.File
-import net.sarazan.bismarck.ratelimit.PersistentFreshness
+import net.sarazan.bismarck.freshness.PersistentFreshness
 import net.sarazan.bismarck.serialization.StringSerializer
 import net.sarazan.bismarck.storage.FileStorage
 
@@ -26,21 +26,21 @@ class PersistentFreshnessTests {
     }
 
     @Test
-    fun testPersistentFreshness() {
-        var bismarck = Bismarck.create<String> {
+    fun testPersistentFreshness() = runBlockingTest {
+        var bismarck = Bismarck.create {
             storage = FileStorage("./storage.txt", StringSerializer)
             freshness = PersistentFreshness("./foo.txt", 1000)
         }
-        assertEquals(bismarck.state, Stale)
+        assertEquals(bismarck.states.value, Stale)
         bismarck.insert("foo")
-        assertEquals(bismarck.value, "foo")
-        assertEquals(bismarck.state, Fresh)
+        assertEquals(bismarck.values.value, "foo")
+        assertEquals(bismarck.states.value, Fresh)
 
         bismarck = Bismarck.create {
             storage = FileStorage("./storage.txt", StringSerializer)
             freshness = PersistentFreshness("./foo.txt", 1000)
         }
-        assertEquals(bismarck.value, "foo")
-        assertEquals(bismarck.state, Fresh)
+        assertEquals(bismarck.values.value, "foo")
+        assertEquals(bismarck.states.value, Fresh)
     }
 }

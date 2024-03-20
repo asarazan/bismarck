@@ -14,7 +14,7 @@ class FileTests {
 
     @Test
     @ExperimentalStdlibApi
-    fun writeAndReadFile() {
+    fun writeAndReadFile() = runBlockingTest {
         var file = File("./foo.txt")
         assertFalse(file.exists)
 
