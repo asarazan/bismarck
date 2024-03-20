@@ -17,4 +17,3 @@ dependencyResolutionManagement {
 rootProject.name = "bismarck-parent"
 include(":bismarck")
 include(":bismarck-kotlinx-json")
-include(":bismarck-classic")

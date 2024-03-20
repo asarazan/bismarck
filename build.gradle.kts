@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.mavenPublish) apply false
     alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.kotlinAndroid) apply false
+    alias(libs.plugins.kotlinKover) apply false
 }
 
 val GROUP: String by project
