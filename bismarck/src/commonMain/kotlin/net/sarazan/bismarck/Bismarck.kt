@@ -1,6 +1,7 @@
 package net.sarazan.bismarck
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 import net.sarazan.bismarck.platform.BismarckDispatchers
 import net.sarazan.bismarck.platform.Closeable
 import net.sarazan.bismarck.ratelimit.Freshness
@@ -30,8 +31,13 @@ interface Bismarck<T : Any> : Closeable {
     }
 
     val value: T?
+    val valueFlow: StateFlow<T?>
+
     val state: State
+    val stateFlow: StateFlow<State?>
+
     val error: Exception?
+    val errorFlow: StateFlow<Exception?>
 
     suspend fun eachValue(fn: (T?) -> Unit)
     suspend fun eachState(fn: (State?) -> Unit)

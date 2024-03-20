@@ -3,6 +3,7 @@ package net.sarazan.bismarck
 import co.touchlab.stately.concurrency.AtomicInt
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import net.sarazan.bismarck.Bismarck.State.Stale
 import net.sarazan.bismarck.platform.currentTimeNano
@@ -17,12 +18,16 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
                 valueChannel.emit(storage.get())
             }
         }
+    override val valueFlow: StateFlow<T?>
+        get() = valueChannel
 
     override val state: Bismarck.State get() = when {
         _fetchCount.get() > 0 -> Bismarck.State.Fetching
         freshness?.isFresh() ?: false -> Bismarck.State.Fresh
         else -> Stale
     }
+    override val stateFlow: StateFlow<Bismarck.State?>
+        get() = stateChannel
 
     override var error: Exception? = null
         private set(value) {
@@ -31,6 +36,8 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
                 errorChannel.emit(field)
             }
         }
+    override val errorFlow: StateFlow<Exception?>
+        get() = errorChannel
 
     private val _fetchCount = AtomicInt(0)
     private var fetchJob: Job? = null
