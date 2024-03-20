@@ -123,27 +123,32 @@ class CommonTests {
 
     @Test
     fun testError() = runBlockingTest {
-        val exception = RuntimeException("Foo")
-        var received: Exception? = null
+        var exception: Exception? = RuntimeException("Foo")
+        var received: Throwable? = null
         val bismarck = Bismarck.create<String> {
             fetcher = {
                 delay(100)
-                throw exception
+                exception?.let { throw it }
             }
         }
         GlobalScope.launch {
-            bismarck.errors.collectLatest {
+            bismarck.errors.collect {
                 received = it
             }
         }
-        assertEquals(null, bismarck.error)
+        assertEquals(null, bismarck.errors.value)
         assertEquals(null, received)
         bismarck.invalidate()
-        assertEquals(null, bismarck.error)
+        assertEquals(null, bismarck.errors.value)
         assertEquals(null, received)
         delay(200)
-        assertEquals(exception, bismarck.error)
+        assertEquals(exception, bismarck.errors.value)
         assertEquals(exception, received)
+        exception = null
+        bismarck.check()
+        delay(200)
+        assertEquals(null, bismarck.errors.value)
+        assertEquals(null, received)
     }
 
     @Test

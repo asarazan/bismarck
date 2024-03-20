@@ -34,9 +34,7 @@ interface Bismarck<T : Any> {
     val values: StateFlow<T?>
 
     val states: StateFlow<State?>
-
-    val error: Exception?
-    val errors: StateFlow<Exception?>
+    val errors: StateFlow<Throwable?>
 
     suspend fun insert(value: T?)
     suspend fun invalidate()

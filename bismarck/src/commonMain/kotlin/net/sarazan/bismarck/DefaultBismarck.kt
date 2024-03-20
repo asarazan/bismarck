@@ -26,14 +26,6 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
             }
         }
 
-    override var error: Exception? = null
-        private set(value) {
-            field = value
-            scope.launch {
-                _errors.emit(field)
-            }
-        }
-
     private val _fetchCount = AtomicInt(0)
     private var fetchJob: Job? = null
     private var freshnessJob: Job? = null
@@ -52,9 +44,9 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         get() = _states
     private val _states = MutableStateFlow(getState())
 
-    override val errors: StateFlow<Exception?>
+    override val errors: StateFlow<Throwable?>
         get() = _errors
-    private val _errors = MutableStateFlow(error)
+    private val _errors = MutableStateFlow<Throwable?>(null)
 
     init {
         scope.launch {
@@ -95,10 +87,11 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
             try {
                 if (freshness?.isFresh() != true) {
                     insert(fetch.invoke(), time, false)
-                    error = null
+                    _errors.emit(null)
                 }
             } catch (e: Exception) {
-                error = e
+                _errors.emit(e)
+                resetFreshness()
             } finally {
                 _fetchCount.decrementAndGet()
                 updateState()
