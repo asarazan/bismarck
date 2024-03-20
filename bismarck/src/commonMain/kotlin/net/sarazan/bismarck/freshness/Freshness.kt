@@ -16,10 +16,12 @@
 
 package net.sarazan.bismarck.freshness
 
+import kotlin.time.Duration
+
 interface Freshness {
     fun update(requestNanos: Long)
     fun reset()
     fun isFresh(): Boolean
 
-    fun getRemainingNanos(): Long?
+    fun remainingTime(): Duration?
 }

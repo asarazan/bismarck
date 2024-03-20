@@ -6,6 +6,8 @@ import net.sarazan.bismarck.freshness.PersistentFreshness
 import net.sarazan.bismarck.freshness.SimpleFreshness
 import net.sarazan.bismarck.serialization.Serializer
 import net.sarazan.bismarck.storage.FileStorage
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 @BismarckConfigMarker
 class FilesConfig<T : Any> {
@@ -15,7 +17,7 @@ class FilesConfig<T : Any> {
 
 @BismarckConfigMarker
 class FreshnessConfig {
-    var millis: Long = 15 * 60 * 1000
+    var duration: Duration = (15 * 60 * 1000).milliseconds
     var path: String? = null
 }
 
@@ -27,7 +29,7 @@ fun <T : Any> Bismarck.Config<T>.fileStorage(init: FilesConfig<T>.() -> Unit) {
 fun <T : Any> Bismarck.Config<T>.freshness(init: FreshnessConfig.() -> Unit) {
     val fresh = FreshnessConfig().apply(init)
     freshness = when (val it = fresh.path) {
-        null -> SimpleFreshness(fresh.millis)
-        else -> PersistentFreshness(it, fresh.millis)
+        null -> SimpleFreshness(fresh.duration)
+        else -> PersistentFreshness(it, fresh.duration)
     }
 }

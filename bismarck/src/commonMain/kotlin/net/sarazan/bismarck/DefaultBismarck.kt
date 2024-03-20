@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import net.sarazan.bismarck.Bismarck.State
 import net.sarazan.bismarck.Bismarck.State.Stale
 import net.sarazan.bismarck.platform.currentTimeNano
-import kotlin.time.Duration.Companion.nanoseconds
 
 class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarck<T> {
 
@@ -106,10 +105,10 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
     private suspend fun updateFreshness(timestamp: Long) {
         freshness?.update(timestamp)
         updateState()
-        freshness?.getRemainingNanos()?.let {
+        freshness?.remainingTime()?.let {
             freshnessJob?.cancel()
             freshnessJob = scope.launch {
-                delay(it.nanoseconds)
+                delay(it)
                 updateState()
             }
         }

@@ -17,14 +17,12 @@
 package net.sarazan.bismarck.freshness
 
 import net.sarazan.bismarck.platform.currentTimeNano
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
 
-open class SimpleFreshness(val ms: Long) : Freshness {
+open class SimpleFreshness(val duration: Duration) : Freshness {
 
-    var lastRunNanos: Long = 0
-        protected set
-
+    protected var lastRunNanos: Long = 0
     protected var resetNanos: Long = 0
 
     override fun update(requestNanos: Long) {
@@ -44,9 +42,9 @@ open class SimpleFreshness(val ms: Long) : Freshness {
         return !pass(getCurrent())
     }
 
-    override fun getRemainingNanos(): Long? {
-        val expires = lastRunNanos.nanoseconds + ms.milliseconds
-        return (expires - currentTimeNano().nanoseconds).inWholeNanoseconds
+    override fun remainingTime(): Duration? {
+        val expires = lastRunNanos.nanoseconds + duration
+        return (expires - currentTimeNano().nanoseconds)
     }
 
     private fun getCurrent(): Long {
@@ -55,7 +53,7 @@ open class SimpleFreshness(val ms: Long) : Freshness {
 
     private fun pass(current: Long): Boolean {
         val last = lastRunNanos
-        val ns = ms.milliseconds.inWholeNanoseconds
+        val ns = duration.inWholeNanoseconds
         return last == 0L || current - last >= ns
     }
 
