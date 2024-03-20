@@ -8,7 +8,7 @@ import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.Bismarck.State.Fresh
 import net.sarazan.bismarck.Bismarck.State.Stale
 import net.sarazan.bismarck.platform.File
-import net.sarazan.bismarck.ratelimit.PersistentFreshness
+import net.sarazan.bismarck.freshness.PersistentFreshness
 import net.sarazan.bismarck.serialization.StringSerializer
 import net.sarazan.bismarck.storage.FileStorage
 

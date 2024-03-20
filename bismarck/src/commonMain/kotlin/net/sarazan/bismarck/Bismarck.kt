@@ -3,8 +3,7 @@ package net.sarazan.bismarck
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import net.sarazan.bismarck.platform.BismarckDispatchers
-import net.sarazan.bismarck.platform.Closeable
-import net.sarazan.bismarck.ratelimit.Freshness
+import net.sarazan.bismarck.freshness.Freshness
 import net.sarazan.bismarck.storage.MemoryStorage
 import net.sarazan.bismarck.storage.Storage
 

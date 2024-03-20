@@ -2,8 +2,8 @@ package net.sarazan.bismarck.extensions
 
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.BismarckConfigMarker
-import net.sarazan.bismarck.ratelimit.PersistentFreshness
-import net.sarazan.bismarck.ratelimit.SimpleFreshness
+import net.sarazan.bismarck.freshness.PersistentFreshness
+import net.sarazan.bismarck.freshness.SimpleFreshness
 import net.sarazan.bismarck.serialization.Serializer
 import net.sarazan.bismarck.storage.FileStorage
 

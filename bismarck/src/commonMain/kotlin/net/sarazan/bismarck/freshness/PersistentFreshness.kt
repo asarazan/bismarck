@@ -1,4 +1,4 @@
-package net.sarazan.bismarck.ratelimit
+package net.sarazan.bismarck.freshness
 
 import net.sarazan.bismarck.platform.File
 import net.sarazan.bismarck.platform.readString

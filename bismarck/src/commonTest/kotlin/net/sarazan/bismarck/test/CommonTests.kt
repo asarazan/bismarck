@@ -12,7 +12,7 @@ import net.sarazan.bismarck.Bismarck.State
 import net.sarazan.bismarck.Bismarck.State.Fetching
 import net.sarazan.bismarck.Bismarck.State.Fresh
 import net.sarazan.bismarck.Bismarck.State.Stale
-import net.sarazan.bismarck.ratelimit.SimpleFreshness
+import net.sarazan.bismarck.freshness.SimpleFreshness
 import net.sarazan.bismarck.storage.MemoryStorage
 import kotlin.test.Test
 import kotlin.test.assertEquals

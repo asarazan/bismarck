@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sarazan.bismarck.ratelimit
+package net.sarazan.bismarck.freshness
 
 import net.sarazan.bismarck.platform.currentTimeNano
 
