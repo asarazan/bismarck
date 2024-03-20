@@ -31,17 +31,13 @@ interface Bismarck<T : Any> : Closeable {
     }
 
     val value: T?
-    val valueFlow: StateFlow<T?>
+    val values: StateFlow<T?>
 
     val state: State
-    val stateFlow: StateFlow<State?>
+    val states: StateFlow<State?>
 
     val error: Exception?
-    val errorFlow: StateFlow<Exception?>
-
-    suspend fun eachValue(fn: (T?) -> Unit)
-    suspend fun eachState(fn: (State?) -> Unit)
-    suspend fun eachError(fn: (Exception?) -> Unit)
+    val errors: StateFlow<Exception?>
 
     fun check()
     fun insert(value: T?)

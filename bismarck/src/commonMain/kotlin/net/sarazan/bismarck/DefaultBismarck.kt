@@ -18,7 +18,7 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
                 valueChannel.emit(storage.get())
             }
         }
-    override val valueFlow: StateFlow<T?>
+    override val values: StateFlow<T?>
         get() = valueChannel
 
     override val state: Bismarck.State get() = when {
@@ -26,7 +26,7 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         freshness?.isFresh() ?: false -> Bismarck.State.Fresh
         else -> Stale
     }
-    override val stateFlow: StateFlow<Bismarck.State?>
+    override val states: StateFlow<Bismarck.State?>
         get() = stateChannel
 
     override var error: Exception? = null
@@ -36,7 +36,7 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
                 errorChannel.emit(field)
             }
         }
-    override val errorFlow: StateFlow<Exception?>
+    override val errors: StateFlow<Exception?>
         get() = errorChannel
 
     private val _fetchCount = AtomicInt(0)
@@ -60,16 +60,6 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
                 check()
             }
         }
-    }
-
-    override suspend fun eachValue(fn: (T?) -> Unit) {
-        valueChannel.collect(fn)
-    }
-    override suspend fun eachState(fn: (Bismarck.State?) -> Unit) {
-        stateChannel.collect(fn)
-    }
-    override suspend fun eachError(fn: (Exception?) -> Unit) {
-        errorChannel.collect(fn)
     }
 
     override fun check() {

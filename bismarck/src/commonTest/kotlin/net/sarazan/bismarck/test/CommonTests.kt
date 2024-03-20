@@ -5,6 +5,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.Bismarck.State
@@ -85,7 +86,7 @@ class CommonTests {
         var received: String? = null
         val bismarck = Bismarck.create<String>()
         GlobalScope.launch {
-            bismarck.eachValue {
+            bismarck.values.collectLatest {
                 received = it
             }
         }
@@ -106,7 +107,7 @@ class CommonTests {
             }
         }
         GlobalScope.launch {
-            bismarck.eachState {
+            bismarck.states.collectLatest {
                 received = it
             }
         }
@@ -131,7 +132,7 @@ class CommonTests {
             }
         }
         GlobalScope.launch {
-            bismarck.eachError {
+            bismarck.errors.collectLatest {
                 received = it
             }
         }
@@ -159,11 +160,11 @@ class CommonTests {
         }
 
         GlobalScope.launch {
-            bismarck.eachState {
+            bismarck.states.collectLatest {
                 println("Dedupe State: $it")
             }
 
-            bismarck.eachValue {
+            bismarck.values.collectLatest {
                 println("Dedupe Value: $it")
             }
         }
