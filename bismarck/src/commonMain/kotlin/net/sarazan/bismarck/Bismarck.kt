@@ -48,8 +48,6 @@ interface Bismarck<T : Any> : Closeable {
     fun invalidate()
     fun clear()
 
-    fun rescope(scope: CoroutineScope) = RescopedBismarck(this, scope)
-
     companion object {
         fun <T : Any> create(config: Config<T>): Bismarck<T> {
             return DefaultBismarck(config)
