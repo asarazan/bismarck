@@ -3,8 +3,9 @@ package net.sarazan.bismarck.freshness
 import net.sarazan.bismarck.platform.File
 import net.sarazan.bismarck.platform.readString
 import net.sarazan.bismarck.platform.writeString
+import kotlin.time.Duration
 
-class PersistentFreshness(path: String, ms: Long) : SimpleFreshness(ms) {
+class PersistentFreshness(path: String, duration: Duration) : SimpleFreshness(duration) {
 
     private val file = File(path)
 

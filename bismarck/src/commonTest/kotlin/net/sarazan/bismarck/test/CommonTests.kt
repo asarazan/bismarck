@@ -16,6 +16,7 @@ import net.sarazan.bismarck.freshness.SimpleFreshness
 import net.sarazan.bismarck.storage.MemoryStorage
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(DelicateCoroutinesApi::class)
 @ObsoleteCoroutinesApi
@@ -33,7 +34,7 @@ class CommonTests {
     @Test
     fun testFreshness() = runBlockingTest {
         val bismarck = Bismarck.create<String> {
-            freshness = SimpleFreshness(100)
+            freshness = SimpleFreshness(100.milliseconds)
         }
         assertEquals(Stale, bismarck.states.value)
         bismarck.insert("Foo")
@@ -49,7 +50,7 @@ class CommonTests {
     @Test
     fun testFetch() = runBlockingTest {
         val bismarck = Bismarck.create<String> {
-            freshness = SimpleFreshness(100)
+            freshness = SimpleFreshness(100.milliseconds)
             fetcher = {
                 delay(100)
                 "Foo"
@@ -100,7 +101,7 @@ class CommonTests {
     fun testStateChannel() = runBlockingTest {
         var received: State? = null
         val bismarck = Bismarck.create<String> {
-            freshness = SimpleFreshness(100)
+            freshness = SimpleFreshness(100.milliseconds)
             fetcher = {
                 delay(100)
                 "Foo"
@@ -157,7 +158,7 @@ class CommonTests {
 
         // Simple bismarck that is fresh for 1s, fetches in 100ms, and increments each time.
         val bismarck = Bismarck.create<String> {
-            freshness = SimpleFreshness(1000)
+            freshness = SimpleFreshness(1000.milliseconds)
             fetcher = {
                 delay(100)
                 "Foob-${counter++}"
