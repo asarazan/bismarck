@@ -22,9 +22,7 @@ import kotlin.time.Duration.Companion.nanoseconds
 
 open class SimpleFreshness(val duration: Duration) : Freshness {
 
-    var lastRunNanos: Long = 0
-        protected set
-
+    protected var lastRunNanos: Long = 0
     protected var resetNanos: Long = 0
 
     override fun update(requestNanos: Long) {
