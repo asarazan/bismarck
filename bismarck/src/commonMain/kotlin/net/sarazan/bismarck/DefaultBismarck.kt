@@ -1,12 +1,19 @@
 package net.sarazan.bismarck
 
 import co.touchlab.stately.concurrency.AtomicInt
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import net.sarazan.bismarck.Bismarck.State
 import net.sarazan.bismarck.Bismarck.State.Stale
 import net.sarazan.bismarck.platform.currentTimeNano
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.nanoseconds
 
 class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarck<T> {
 
@@ -15,73 +22,68 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         set(value) {
             storage.put(value)
             scope.launch {
-                valueChannel.emit(storage.get())
+                _values.emit(storage.get())
             }
         }
-    override val values: StateFlow<T?>
-        get() = valueChannel
-
-    override val state: Bismarck.State get() = when {
-        _fetchCount.get() > 0 -> Bismarck.State.Fetching
-        freshness?.isFresh() ?: false -> Bismarck.State.Fresh
-        else -> Stale
-    }
-    override val states: StateFlow<Bismarck.State?>
-        get() = stateChannel
 
     override var error: Exception? = null
         private set(value) {
             field = value
             scope.launch {
-                errorChannel.emit(field)
+                _errors.emit(field)
             }
         }
-    override val errors: StateFlow<Exception?>
-        get() = errorChannel
 
     private val _fetchCount = AtomicInt(0)
     private var fetchJob: Job? = null
-
-    private val valueChannel by lazy { MutableStateFlow(value) }
-    private val stateChannel by lazy { MutableStateFlow(state) }
-    private val errorChannel by lazy { MutableStateFlow(error) }
+    private var freshnessJob: Job? = null
 
     private val fetcher get() = config.fetcher
     private val freshness get() = config.freshness
     private val storage get() = config.storage
-    private val scope get() = config.scope
+    private val dispatcher get() = config.dispatcher
+    private val scope = CoroutineScope(dispatcher + SupervisorJob())
+
+    override val values: StateFlow<T?>
+        get() = _values
+    private val _values = MutableStateFlow(value)
+
+    override val states: StateFlow<State?>
+        get() = _states
+    private val _states = MutableStateFlow(getState())
+
+    override val errors: StateFlow<Exception?>
+        get() = _errors
+    private val _errors = MutableStateFlow(error)
 
     init {
         scope.launch {
-            valueChannel.emit(value)
-            stateChannel.emit(state)
-            errorChannel.emit(error)
             if (config.checkOnLaunch) {
                 check()
             }
         }
     }
 
-    override fun check() {
+    override suspend fun check() {
         if (freshness?.isFresh() != true) {
             fetch()
         }
     }
 
-    override fun insert(value: T?) {
+    override suspend fun insert(value: T?) {
         insert(value, currentTimeNano(), false)
     }
 
-    override fun invalidate() {
-        freshness?.reset()
+    override suspend fun invalidate() {
+        resetFreshness()
         check()
     }
 
-    override fun clear() {
+    override suspend fun clear() {
         insert(null, currentTimeNano(), true)
     }
 
-    internal fun fetch() {
+    private suspend fun fetch() {
         val fetch = fetcher ?: return
         val time = currentTimeNano()
         _fetchCount.incrementAndGet()
@@ -104,19 +106,39 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         }
     }
 
-    private fun insert(value: T?, timestamp: Long, reset: Boolean) {
+    private suspend fun insert(value: T?, timestamp: Long, reset: Boolean) {
         this.value = value
         if (reset) {
-            freshness?.reset()
+            resetFreshness()
         } else {
-            freshness?.update(timestamp)
+            updateFreshness(timestamp)
         }
+    }
+
+    private suspend fun resetFreshness() {
+        freshness?.reset()
         updateState()
     }
 
-    private fun updateState() {
-        scope.launch {
-            stateChannel.emit(state)
+    private suspend fun updateFreshness(timestamp: Long) {
+        freshness?.update(timestamp)
+        updateState()
+        freshness?.getRemainingNanos()?.let {
+            freshnessJob?.cancel()
+            freshnessJob = scope.launch {
+                delay(it.nanoseconds)
+                updateState()
+            }
         }
+    }
+
+    private suspend fun updateState() {
+        _states.emit(getState())
+    }
+
+    private fun getState() = when {
+        _fetchCount.get() > 0 -> State.Fetching
+        freshness?.isFresh() ?: false -> State.Fresh
+        else -> Stale
     }
 }

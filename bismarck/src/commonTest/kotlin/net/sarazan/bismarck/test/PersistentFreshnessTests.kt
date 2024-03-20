@@ -26,21 +26,21 @@ class PersistentFreshnessTests {
     }
 
     @Test
-    fun testPersistentFreshness() {
-        var bismarck = Bismarck.create<String> {
+    fun testPersistentFreshness() = runBlockingTest {
+        var bismarck = Bismarck.create {
             storage = FileStorage("./storage.txt", StringSerializer)
             freshness = PersistentFreshness("./foo.txt", 1000)
         }
-        assertEquals(bismarck.state, Stale)
+        assertEquals(bismarck.states.value, Stale)
         bismarck.insert("foo")
         assertEquals(bismarck.value, "foo")
-        assertEquals(bismarck.state, Fresh)
+        assertEquals(bismarck.states.value, Fresh)
 
         bismarck = Bismarck.create {
             storage = FileStorage("./storage.txt", StringSerializer)
             freshness = PersistentFreshness("./foo.txt", 1000)
         }
         assertEquals(bismarck.value, "foo")
-        assertEquals(bismarck.state, Fresh)
+        assertEquals(bismarck.states.value, Fresh)
     }
 }

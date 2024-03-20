@@ -1,5 +1,6 @@
 package net.sarazan.bismarck
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import net.sarazan.bismarck.platform.BismarckDispatchers
@@ -19,7 +20,7 @@ interface Bismarck<T : Any> {
         var fetcher: Fetcher<T>? = null,
         var freshness: Freshness? = null,
         var storage: Storage<T> = MemoryStorage(),
-        var scope: CoroutineScope = CoroutineScope(BismarckDispatchers.default),
+        var dispatcher: CoroutineDispatcher = BismarckDispatchers.default,
         var checkOnLaunch: Boolean = false
     )
 
@@ -32,16 +33,15 @@ interface Bismarck<T : Any> {
     val value: T?
     val values: StateFlow<T?>
 
-    val state: State
     val states: StateFlow<State?>
 
     val error: Exception?
     val errors: StateFlow<Exception?>
 
-    fun check()
-    fun insert(value: T?)
-    fun invalidate()
-    fun clear()
+    suspend fun insert(value: T?)
+    suspend fun invalidate()
+    suspend fun check()
+    suspend fun clear()
 
     companion object {
         fun <T : Any> create(config: Config<T>): Bismarck<T> {

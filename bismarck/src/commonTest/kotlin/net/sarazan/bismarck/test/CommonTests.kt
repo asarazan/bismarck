@@ -35,15 +35,15 @@ class CommonTests {
         val bismarck = Bismarck.create<String> {
             freshness = SimpleFreshness(100)
         }
-        assertEquals(Stale, bismarck.state)
+        assertEquals(Stale, bismarck.states.value)
         bismarck.insert("Foo")
-        assertEquals(Fresh, bismarck.state)
+        assertEquals(Fresh, bismarck.states.value)
         bismarck.invalidate()
-        assertEquals(Stale, bismarck.state)
+        assertEquals(Stale, bismarck.states.value)
         bismarck.insert("Foo")
-        assertEquals(Fresh, bismarck.state)
+        assertEquals(Fresh, bismarck.states.value)
         delay(200)
-        assertEquals(Stale, bismarck.state)
+        assertEquals(Stale, bismarck.states.value)
     }
 
     @Test
@@ -55,16 +55,16 @@ class CommonTests {
                 "Foo"
             }
         }
-        assertEquals(Stale, bismarck.state)
+        assertEquals(Stale, bismarck.states.value)
         bismarck.invalidate()
-        assertEquals(Fetching, bismarck.state)
+        assertEquals(Fetching, bismarck.states.value)
         assertEquals(null, bismarck.value)
         delay(50)
-        assertEquals(Fetching, bismarck.state)
+        assertEquals(Fetching, bismarck.states.value)
         assertEquals(null, bismarck.value)
         delay(100)
         assertEquals("Foo", bismarck.value)
-        assertEquals(Fresh, bismarck.state)
+        assertEquals(Fresh, bismarck.states.value)
     }
 
     @Test
@@ -170,24 +170,24 @@ class CommonTests {
         }
 
         println("Should be null and stale. Trigger an invalidate")
-        assertEquals(Stale, bismarck.state)
+        assertEquals(Stale, bismarck.states.value)
         bismarck.invalidate()
 
         println("Should be null and fetching because it takes 100ms.")
-        assertEquals(Fetching, bismarck.state)
+        assertEquals(Fetching, bismarck.states.value)
         println("delay 150")
         delay(150)
 
         println("Should be fresh and in position 0. Invalidate again.")
-        assertEquals(Fresh, bismarck.state)
+        assertEquals(Fresh, bismarck.states.value)
         assertEquals("Foob-0", bismarck.value)
         bismarck.invalidate()
 
         println("Should be fetching and in position 0 for at least 90ms.")
-        assertEquals(Fetching, bismarck.state)
+        assertEquals(Fetching, bismarck.states.value)
         println("delay 90")
         delay(90)
-        assertEquals(Fetching, bismarck.state)
+        assertEquals(Fetching, bismarck.states.value)
         assertEquals("Foob-0", bismarck.value)
 
         println("Trigger a new invalidate. This should theoretically queue up a second fetch in about 10ms")
@@ -196,13 +196,13 @@ class CommonTests {
         delay(50)
 
         println("We should be on the second fetch by now. Current position is 1")
-        assertEquals(Fetching, bismarck.state)
+        assertEquals(Fetching, bismarck.states.value)
         assertEquals("Foob-1", bismarck.value)
         println("delay 100")
         delay(100)
 
         println("The final fetch came in. Fresh in position 2")
-        assertEquals(Fresh, bismarck.state)
+        assertEquals(Fresh, bismarck.states.value)
         assertEquals("Foob-2", bismarck.value)
     }
 }

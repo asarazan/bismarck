@@ -20,8 +20,8 @@ class FileStorageTests {
     }
 
     @Test
-    fun testFileValue() {
-        var bismarck = Bismarck.create<String> {
+    fun testFileValue() = runBlockingTest {
+        var bismarck = Bismarck.create {
             storage = FileStorage(file, StringSerializer)
         }
         assertEquals(bismarck.value, null)
