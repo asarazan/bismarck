@@ -27,15 +27,21 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         get() = CoroutineScope(dispatcher + SupervisorJob())
 
     override val values: StateFlow<T?>
-        get() = _values
+        get() = _values.also {
+            coroutineScope.launch { check() }
+        }
     private val _values = MutableStateFlow(storage.get())
 
     override val states: StateFlow<State?>
-        get() = _states
+        get() = _states.also {
+            coroutineScope.launch { check() }
+        }
     private val _states = MutableStateFlow(getState())
 
     override val errors: StateFlow<Throwable?>
-        get() = _errors
+        get() = _errors.also {
+            coroutineScope.launch { check() }
+        }
     private val _errors = MutableStateFlow<Throwable?>(null)
 
     init {
