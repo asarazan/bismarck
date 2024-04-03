@@ -11,7 +11,6 @@ import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.Bismarck.State.Fetching
 import net.sarazan.bismarck.Bismarck.State.Fresh
 import net.sarazan.bismarck.Bismarck.State.Stale
-import net.sarazan.bismarck.extensions.freshness
 import net.sarazan.bismarck.storage.MemoryStorage
 import kotlin.test.Test
 import kotlin.test.assertEquals
