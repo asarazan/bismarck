@@ -29,7 +29,7 @@ fun <T : Any> Bismarck.Config<T>.fileStorage(init: FilesConfig<T>.() -> Unit) {
 fun <T : Any> Bismarck.Config<T>.freshness(init: FreshnessConfig.() -> Unit) {
     val fresh = FreshnessConfig().apply(init)
     freshness = when (val it = fresh.path) {
-        null -> SimpleFreshness(fresh.duration)
-        else -> PersistentFreshness(it, fresh.duration)
+        null -> SimpleFreshness(fresh.duration, timeSource)
+        else -> PersistentFreshness(it, fresh.duration, timeSource)
     }
 }

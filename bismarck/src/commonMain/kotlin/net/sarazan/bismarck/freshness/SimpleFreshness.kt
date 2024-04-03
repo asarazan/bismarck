@@ -16,45 +16,40 @@
 
 package net.sarazan.bismarck.freshness
 
-import net.sarazan.bismarck.platform.currentTimeNano
+import kotlin.time.ComparableTimeMark
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.TimeSource
 
-open class SimpleFreshness(val duration: Duration) : Freshness {
+internal open class SimpleFreshness(
+    private val duration: Duration,
+    private val timeSource: TimeSource.WithComparableMarks
+) : Freshness {
 
-    protected var lastRunNanos: Long = 0
-    protected var resetNanos: Long = 0
+    protected var lastRunMark: ComparableTimeMark? = null
+    protected var resetMark = timeSource.markNow()
 
-    override fun update(requestNanos: Long) {
-        if (requestNanos >= resetNanos) {
-            lastRunNanos = getCurrent()
+    override fun update(requestTimeMark: ComparableTimeMark) {
+        if (requestTimeMark >= resetMark) {
+            lastRunMark = timeSource.markNow()
             save()
         }
     }
 
     override fun reset() {
-        lastRunNanos = 0
-        resetNanos = getCurrent()
+        lastRunMark = null
+        resetMark = timeSource.markNow()
         save()
     }
 
-    override fun isFresh(): Boolean {
-        return !pass(getCurrent())
+    override fun isFresh() = lastRunMark.let { lastRunMark ->
+        lastRunMark != null && timeSource.markNow() - lastRunMark < duration
     }
 
     override fun remainingTime(): Duration? {
-        val expires = lastRunNanos.nanoseconds + duration
-        return (expires - currentTimeNano().nanoseconds)
-    }
-
-    private fun getCurrent(): Long {
-        return currentTimeNano()
-    }
-
-    private fun pass(current: Long): Boolean {
-        val last = lastRunNanos
-        val ns = duration.inWholeNanoseconds
-        return last == 0L || current - last >= ns
+        return lastRunMark?.let {
+            val expires = it + duration
+            expires - timeSource.markNow()
+        }
     }
 
     protected open fun save() {}

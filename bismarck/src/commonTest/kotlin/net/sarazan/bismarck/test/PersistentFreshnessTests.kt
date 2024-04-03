@@ -3,6 +3,7 @@ package net.sarazan.bismarck.test
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.Bismarck.State.Fresh
 import net.sarazan.bismarck.Bismarck.State.Stale
+import net.sarazan.bismarck.extensions.freshness
 import net.sarazan.bismarck.freshness.PersistentFreshness
 import net.sarazan.bismarck.platform.File
 import net.sarazan.bismarck.serialization.StringSerializer
@@ -30,7 +31,10 @@ class PersistentFreshnessTests {
     fun testPersistentFreshness() = runBlockingTest {
         var bismarck = Bismarck.create {
             storage = FileStorage("./storage.txt", StringSerializer)
-            freshness = PersistentFreshness("./foo.txt", 1000.milliseconds)
+            freshness {
+                path = "./foo.txt"
+                duration = 100.milliseconds
+            }
         }
         assertEquals(bismarck.states.value, Stale)
         bismarck.insert("foo")
@@ -39,7 +43,10 @@ class PersistentFreshnessTests {
 
         bismarck = Bismarck.create {
             storage = FileStorage("./storage.txt", StringSerializer)
-            freshness = PersistentFreshness("./foo.txt", 1000.milliseconds)
+            freshness {
+                path = "./foo.txt"
+                duration = 1000.milliseconds
+            }
         }
         assertEquals(bismarck.values.value, "foo")
         assertEquals(bismarck.states.value, Fresh)

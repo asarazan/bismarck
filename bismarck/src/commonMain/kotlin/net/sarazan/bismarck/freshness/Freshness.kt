@@ -16,10 +16,11 @@
 
 package net.sarazan.bismarck.freshness
 
+import kotlin.time.ComparableTimeMark
 import kotlin.time.Duration
 
 interface Freshness {
-    fun update(requestNanos: Long)
+    fun update(requestTimeMark: ComparableTimeMark)
     fun reset()
     fun isFresh(): Boolean
 

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import net.sarazan.bismarck.Bismarck.State
 import net.sarazan.bismarck.Bismarck.State.Stale
-import net.sarazan.bismarck.platform.currentTimeNano
+import kotlin.time.ComparableTimeMark
 
 class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarck<T> {
 
@@ -59,7 +59,7 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
     }
 
     override suspend fun insert(value: T?) {
-        insert(value, currentTimeNano(), false)
+        insert(value, false)
     }
 
     override suspend fun invalidate() {
@@ -68,12 +68,12 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
     }
 
     override suspend fun clear() {
-        insert(null, currentTimeNano(), true)
+        insert(null, true)
     }
 
     private suspend fun fetch() {
         val fetch = fetcher ?: return
-        val time = currentTimeNano()
+        val timeMark = config.timeSource.markNow()
         _fetchCount.incrementAndGet()
         updateState()
         val job = fetchJob
@@ -82,7 +82,7 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
             job?.join()
             try {
                 if (freshness?.isFresh() != true) {
-                    insert(fetch.invoke(), time, false)
+                    insert(fetch.invoke(), false, timeMark)
                     _errors.emit(null)
                 }
             } catch (e: Exception) {
@@ -95,13 +95,17 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         }
     }
 
-    private suspend fun insert(value: T?, timestamp: Long, reset: Boolean) {
+    private suspend fun insert(
+        value: T?,
+        reset: Boolean,
+        timeMark: ComparableTimeMark = config.timeSource.markNow()
+    ) {
         _values.emit(value)
         storage.put(value)
         if (reset) {
             resetFreshness()
         } else {
-            updateFreshness(timestamp)
+            updateFreshness(timeMark)
         }
     }
 
@@ -110,8 +114,8 @@ class DefaultBismarck<T : Any>(private val config: Bismarck.Config<T>) : Bismarc
         updateState()
     }
 
-    private suspend fun updateFreshness(timestamp: Long) {
-        freshness?.update(timestamp)
+    private suspend fun updateFreshness(timeMark: ComparableTimeMark) {
+        freshness?.update(timeMark)
         updateState()
         freshness?.remainingTime()?.let {
             freshnessJob?.cancel()

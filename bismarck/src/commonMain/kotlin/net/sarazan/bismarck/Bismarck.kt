@@ -3,10 +3,12 @@ package net.sarazan.bismarck
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.datetime.Clock
 import net.sarazan.bismarck.freshness.Freshness
 import net.sarazan.bismarck.platform.BismarckDispatchers
 import net.sarazan.bismarck.storage.MemoryStorage
 import net.sarazan.bismarck.storage.Storage
+import kotlin.time.TimeSource
 
 @DslMarker
 annotation class BismarckConfigMarker
@@ -21,7 +23,8 @@ interface Bismarck<T : Any> {
         var freshness: Freshness? = null,
         var storage: Storage<T> = MemoryStorage(),
         var dispatcher: CoroutineDispatcher = BismarckDispatchers.default,
-        var checkOnLaunch: Boolean = false
+        var checkOnLaunch: Boolean = false,
+        var timeSource: TimeSource.WithComparableMarks = TimeSource.Monotonic
     )
 
     enum class State {
