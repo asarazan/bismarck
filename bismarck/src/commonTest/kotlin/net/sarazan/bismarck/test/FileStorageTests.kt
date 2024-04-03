@@ -1,5 +1,6 @@
 package net.sarazan.bismarck.test
 
+import kotlinx.coroutines.test.runTest
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.platform.File
 import net.sarazan.bismarck.platform.readString
@@ -20,7 +21,7 @@ class FileStorageTests {
     }
 
     @Test
-    fun testFileValue() = runBlockingTest {
+    fun testFileValue() = runTest {
         var bismarck = Bismarck.create {
             storage = FileStorage(file, StringSerializer)
         }

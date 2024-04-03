@@ -7,6 +7,7 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runTest
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.Bismarck.State
 import net.sarazan.bismarck.Bismarck.State.Fetching
@@ -24,7 +25,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class CommonTests {
 
     @Test
-    fun testInsert() = runBlockingTest {
+    fun testInsert() = runTest {
         val bismarck = Bismarck.create<String>()
         assertEquals(null, bismarck.values.value)
         bismarck.insert("Foo")
@@ -32,7 +33,7 @@ class CommonTests {
     }
 
     @Test
-    fun testFreshness() = runBlockingTest {
+    fun testFreshness() = runTest {
         val bismarck = Bismarck.create<String> {
             freshness = SimpleFreshness(100.milliseconds)
         }
@@ -48,7 +49,7 @@ class CommonTests {
     }
 
     @Test
-    fun testFetch() = runBlockingTest {
+    fun testFetch() = runTest {
         val bismarck = Bismarck.create<String> {
             freshness = SimpleFreshness(100.milliseconds)
             fetcher = {
@@ -69,7 +70,7 @@ class CommonTests {
     }
 
     @Test
-    fun testPersisterInit() = runBlockingTest {
+    fun testPersisterInit() = runTest {
         val persister = MemoryStorage<String>()
         var bismarck = Bismarck.create<String> {
             this.storage = persister
@@ -83,7 +84,7 @@ class CommonTests {
     }
 
     @Test
-    fun testDataChannel() = runBlockingTest {
+    fun testDataChannel() = runTest {
         var received: String? = null
         val bismarck = Bismarck.create<String>()
         GlobalScope.launch {
@@ -98,7 +99,7 @@ class CommonTests {
     }
 
     @Test
-    fun testStateChannel() = runBlockingTest {
+    fun testStateChannel() = runTest {
         var received: State? = null
         val bismarck = Bismarck.create<String> {
             freshness = SimpleFreshness(100.milliseconds)
@@ -123,7 +124,7 @@ class CommonTests {
     }
 
     @Test
-    fun testError() = runBlockingTest {
+    fun testError() = runTest {
         var exception: Exception? = RuntimeException("Foo")
         var received: Throwable? = null
         val bismarck = Bismarck.create<String> {
@@ -153,7 +154,7 @@ class CommonTests {
     }
 
     @Test
-    fun testDedupe() = runBlockingTest {
+    fun testDedupe() = runTest {
         var counter = 0
 
         // Simple bismarck that is fresh for 1s, fetches in 100ms, and increments each time.

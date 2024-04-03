@@ -1,5 +1,6 @@
 package net.sarazan.bismarck.test
 
+import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 import net.sarazan.bismarck.platform.File
 import net.sarazan.bismarck.platform.readString
@@ -14,7 +15,7 @@ class FileTests {
 
     @Test
     @ExperimentalStdlibApi
-    fun writeAndReadFile() = runBlockingTest {
+    fun writeAndReadFile() = runTest {
         var file = File("./foo.txt")
         assertFalse(file.exists)
 

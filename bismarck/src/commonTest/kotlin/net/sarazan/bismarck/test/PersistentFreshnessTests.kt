@@ -1,5 +1,6 @@
 package net.sarazan.bismarck.test
 
+import kotlinx.coroutines.test.runTest
 import net.sarazan.bismarck.Bismarck
 import net.sarazan.bismarck.Bismarck.State.Fresh
 import net.sarazan.bismarck.Bismarck.State.Stale
@@ -27,7 +28,7 @@ class PersistentFreshnessTests {
     }
 
     @Test
-    fun testPersistentFreshness() = runBlockingTest {
+    fun testPersistentFreshness() = runTest {
         var bismarck = Bismarck.create {
             storage = FileStorage("./storage.txt", StringSerializer)
             freshness = PersistentFreshness("./foo.txt", 1000.milliseconds)
