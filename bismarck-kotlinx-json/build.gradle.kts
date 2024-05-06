@@ -13,6 +13,10 @@ version = VERSION_NAME
 
 kotlin {
     jvm()
+    js(IR) {
+        nodejs()
+        binaries.executable()
+    }
 
     applyDefaultHierarchyTemplate()
     iosArm64()
