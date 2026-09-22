@@ -20,6 +20,5 @@ allprojects {
     repositories {
         mavenCentral()
         google()
-        jcenter()
     }
 }
