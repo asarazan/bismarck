@@ -4,7 +4,9 @@ Guidance for coding agents working in this repo. Read this before trusting the R
 
 ## What this is
 
-Bismarck is a caching/syncing library for Kotlin Multiplatform. A `Bismarck<T>` is a single-value cache cell combining a `Fetcher<T>` (suspend producer), a `Storage<T>` (persistence), and a `Freshness` policy (TTL/invalidation). It exposes `values`/`states`/`errors` as coroutine `StateFlow`s and dedupes concurrent fetches. Published to Maven Central as `net.sarazan:bismarck` and `net.sarazan:bismarck-serializer-kotlinx`, currently version 0.6.2 (pre-1.0; API may still break).
+Bismarck is a caching/syncing library for Kotlin Multiplatform. A `Bismarck<T>` is a single-value cache cell combining a `Fetcher<T>` (suspend producer), a `Storage<T>` (persistence), and a `Freshness` policy (TTL/invalidation). It exposes `values`/`states`/`errors` as coroutine `StateFlow`s and dedupes concurrent fetches (best-effort — see landmine 6). Published to Maven Central as `net.sarazan:bismarck` and `net.sarazan:bismarck-serializer-kotlinx`, version 0.6.2 as of 2026-09 (pre-1.0; API may still break).
+
+Product intent and constraints: [specs/PRODUCT.md](specs/PRODUCT.md). Architecture contracts and the full defect list: [specs/TECH.md](specs/TECH.md).
 
 Targets: JVM, JS (Node only, IR), iOS (arm64, x64, simulatorArm64). No Android target, no macOS/watchOS/tvOS.
 
@@ -34,9 +36,9 @@ Only two modules are in the build (`settings.gradle.kts`):
 ./gradlew publishToMavenLocal
 ```
 
-**Only `jvmTest` is a meaningful gate — and it is currently RED on `main`.** As of 2026-08-09, 2 of 8 CommonTests fail (`testDedupe`, `testStateChannel`, both `expected:<Stale> but was:<Fetching>`), caused by landmine 2 below (observing a flow fires a hidden `check()` that races the assertions — tracked in issue #33). If you see those two failures, they are pre-existing, not your regression; any *other* failure is yours.
+**Only `jvmTest` is a meaningful gate — and while issue #33 is open, it is RED on `main`.** Last verified 2026-09-22: 2 of 8 CommonTests fail (`testDedupe`, `testStateChannel`, both `expected:<Stale> but was:<Fetching>`), caused by landmine 2 below (observing a flow fires a hidden `check()` that races the assertions). Issue #33 is the source of truth for current status: re-run `jvmTest` on a clean checkout of `main` to establish your baseline before changing anything. While #33 is open, those two failures are pre-existing; any *other* failure is yours — and once #33 is closed, ALL failures are yours.
 
- The JS and iOS test harnesses are broken by construction: their `runBlockingTest` actuals (`bismarck/src/jsTest/.../test/Platform.kt`, `bismarck/src/iosTest/.../test/Platform.kt`) do `scope.launch { testBody() }` and return without awaiting, so `jsNodeTest` / `iosSimulatorArm64Test` pass vacuously. Only the JVM actual uses `runBlocking`. Don't interpret green JS/iOS test runs as evidence of anything until those actuals are fixed.
+The JS and iOS test harnesses are broken by construction: their `runBlockingTest` actuals (`bismarck/src/jsTest/.../test/Platform.kt`, `bismarck/src/iosTest/.../test/Platform.kt`) do `scope.launch { testBody() }` and return without awaiting, so `jsNodeTest` / `iosSimulatorArm64Test` pass vacuously. Only the JVM actual uses `runBlocking`. Don't interpret green JS/iOS test runs as evidence of anything until those actuals are fixed.
 
 Tests in `commonTest/CommonTests.kt` are wall-clock-timing-based (`delay(50)` etc.) and inherently flaky. Prefer adding tests with `kotlinx-coroutines-test` virtual time; do not add more `delay()`-calibrated assertions.
 
@@ -50,13 +52,13 @@ There is **no CI**. Nothing verifies work after merge unless you run it yourself
 
 ### Known landmines (verified against source, 2026-08)
 
-1. **`DefaultBismarck.coroutineScope` is a `get()` that constructs a fresh `CoroutineScope` on every access** (`DefaultBismarck.kt:26-27`). Every internal `launch` runs in its own unstructured, never-cancelled scope; there is no cancellation path and the `SupervisorJob` is inert.
-2. **Reading `values`/`states`/`errors` fires a `check()` side effect** (`DefaultBismarck.kt:29-44`) — merely observing the cache can trigger a network fetch. This is what breaks the two currently-red tests.
-3. **iOS `ByteArray.toNSData()` corrupts binary data** (`iosMain/.../platform/NSDataConversions.kt`): it round-trips through `decodeToString()` + UTF-8 encoding. Any non-UTF-8 payload (protobuf, images, JVM serialization) is silently mangled on iOS. JS `File.writeBytes` has the same UTF-8-only assumption. Only the JVM path is binary-safe.
-4. JS `File` resolves relative paths against `__dirname` and uses `js("require(\"fs\")")` — bundler-dependent. (JS `readBytes` is also UTF-8-lossy, same as landmine 3.)
-5. `gradle.properties` has a vestigial `xcodeproj=iosApp/iosApp.xcodeproj`; no such directory exists. No sample apps exist for any platform, and no `binaries.framework {}`/CocoaPods/SPM export is configured — there is currently no way for Swift code to consume the iOS artifacts.
-6. `fetchJob`/`freshnessJob` in `DefaultBismarck` are unsynchronized `var`s mutated from `Dispatchers.IO` threads (the default dispatcher on JVM and iOS) — the read-then-write dedupe gate in `fetch()` can race and fire duplicate fetches.
-7. Publishing is currently broken: `SONATYPE_HOST=DEFAULT` targets Sonatype's OSSRH endpoint (sunset mid-2025) and the vanniktech plugin 0.28.0 predates Central Portal support. Do not attempt to publish until issue #38's migration lands.
+1. **`DefaultBismarck.coroutineScope` is a `get()` that constructs a fresh `CoroutineScope` on every access** (`DefaultBismarck.kt:26-27`). Every internal `launch` runs in its own unstructured, never-cancelled scope; there is no cancellation path and the `SupervisorJob` is inert. Tracked in #32.
+2. **Reading `values`/`states`/`errors` fires a `check()` side effect** (`DefaultBismarck.kt:29-44`) — merely observing the cache can trigger a network fetch. This is what breaks the two red tests. Tracked in #33.
+3. **iOS `ByteArray.toNSData()` corrupts binary data** (`iosMain/.../platform/NSDataConversions.kt`): it round-trips through `decodeToString()` + UTF-8 encoding. Any non-UTF-8 payload (protobuf, images, JVM serialization) is silently mangled on iOS. JS is lossy in both directions (`writeBytes` and `readBytes` go through UTF-8 strings). Only the JVM path is binary-safe. Tracked in #34.
+4. JS `File` resolves relative paths against `__dirname` and uses `js("require(\"fs\")")` — bundler-dependent. Tracked in #37.
+5. No sample apps exist for any platform, and no `binaries.framework {}`/CocoaPods/SPM export is configured — there is currently no way for Swift code to consume the iOS artifacts. Tracked in #39 (framework export is a stated prerequisite there).
+6. `fetchJob`/`freshnessJob` in `DefaultBismarck` are unsynchronized `var`s mutated from `Dispatchers.IO` threads (the default dispatcher on JVM and iOS) — the read-then-write dedupe gate in `fetch()` can race and fire duplicate fetches. Tracked in #32 (scope bullet on state confinement).
+7. Publishing is broken by configuration: `SONATYPE_HOST=DEFAULT` targets Sonatype's OSSRH endpoint, sunset mid-2025. The pinned vanniktech plugin (0.28.0) already supports the Central Portal — the code fix is switching that property to `CENTRAL_PORTAL` — but the `net.sarazan` namespace also needs a manual, account-level Portal migration. Both tracked in #38; don't attempt to publish before it lands.
 
 ### Streaming/cursor backends (design constraint, not a bug)
 
@@ -65,5 +67,5 @@ The whole design models a cache cell as one atomic value: `Storage` is whole-val
 ## Conventions
 
 - Kotlin official style; `.editorconfig` permits wildcard imports. No ktlint/detekt/spotless is wired in — match surrounding style by hand.
-- Versioning: bump `VERSION_NAME` in the module's `gradle.properties`. Releases are not consistently git-tagged.
-- Primarily single-author (asarazan; contributions from vaudevillain in 2020 and Phil Oliver in April 2024); history has two eras — 2019–2021 (classic) and a March 2024 modernization burst. `git log` before 2024 describes the classic architecture, not the current one.
+- Versioning: bump `VERSION_NAME` in the **root** `gradle.properties` (modules inherit it; their own `gradle.properties` carry only `POM_*` keys). Releases are not consistently git-tagged.
+- Primarily single-author (asarazan; vaudevillain contributed 11 commits in 2020). Phil Oliver's April 2024 test-harness work was never merged — it lives on the unmerged `origin/po/testing` branch and is prior art for #31. History has two eras — 2019–2021 (classic) and a March 2024 modernization burst. `git log` before 2024 describes the classic architecture, not the current one.
